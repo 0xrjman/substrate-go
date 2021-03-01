@@ -1,4 +1,5 @@
 package expand
+
 /*
 扩展：解析extrinsic
 	substrate2.0的extrinsic都是这样，所以这里的变动其实很小
@@ -6,8 +7,8 @@ package expand
 */
 import (
 	"fmt"
-	"github.com/JFJun/bifrost-go/utils"
 	"github.com/huandu/xstrings"
+	"github.com/rjman-self/go-polkadot-rpc-client/utils"
 	"github.com/stafiprotocol/go-substrate-rpc-client/scale"
 	"github.com/stafiprotocol/go-substrate-rpc-client/types"
 )
@@ -46,7 +47,6 @@ func NewExtrinsicDecoder(meta *types.Metadata) (*ExtrinsicDecoder, error) {
 	}
 	return ed, nil
 }
-
 
 func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder) error {
 	var length types.UCompact
@@ -183,6 +183,23 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 	ed.CallModule = modName
 	ed.CallModuleFunction = callName
 	switch modName {
+	case "System":
+		if callName == "remark" {
+			fmt.Printf("get Extrinsic Call: System.remark")
+			var s string
+			err = decoder.Decode(&s)
+			if err != nil {
+				return fmt.Errorf("decode call: decode Timestamp.set error: %v", err)
+			}
+
+			ed.Params = append(ed.Params,
+				ExtrinsicParam{
+					Name:  "remark",
+					Type:  "string",
+					Value: s,
+				})
+		}
+
 	case "Timestamp":
 		if callName == "set" {
 			//Compact<Moment>
@@ -281,6 +298,3 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 	}
 	return nil
 }
-
-
-

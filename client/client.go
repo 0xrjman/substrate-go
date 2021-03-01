@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/JFJun/bifrost-go/expand"
-	"github.com/JFJun/bifrost-go/models"
-	"github.com/JFJun/bifrost-go/utils"
 	"github.com/JFJun/go-substrate-crypto/ss58"
+	"github.com/rjman-self/go-polkadot-rpc-client/expand"
+	"github.com/rjman-self/go-polkadot-rpc-client/models"
+	"github.com/rjman-self/go-polkadot-rpc-client/utils"
 
 	gsrc "github.com/stafiprotocol/go-substrate-rpc-client"
 	gsClient "github.com/stafiprotocol/go-substrate-rpc-client/client"
@@ -217,6 +217,14 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 		}
 
 		switch resp.CallModule {
+		case "System":
+			for _, param := range resp.Params {
+				if param.Name == "remark" {
+					var remark = param.Value.(string)
+					fmt.Printf("remark is %v\n", remark)
+				}
+
+			}
 		case "Timestamp":
 			for _, param := range resp.Params {
 				if param.Name == "now" {

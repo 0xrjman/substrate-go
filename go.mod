@@ -1,7 +1,6 @@
-module github.com/JFJun/bifrost-go
+module github.com/rjman-self/go-polkadot-rpc-client
 
 go 1.15
-
 
 require (
 	github.com/JFJun/go-substrate-crypto v1.0.1

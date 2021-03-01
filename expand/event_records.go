@@ -1,8 +1,8 @@
 package expand
 
 import (
-	"github.com/JFJun/bifrost-go/expand/bifrost"
-	"github.com/JFJun/bifrost-go/expand/polkadot"
+	"github.com/rjman-self/go-polkadot-rpc-client/expand/bifrost"
+	"github.com/rjman-self/go-polkadot-rpc-client/expand/polkadot"
 	"github.com/stafiprotocol/go-substrate-rpc-client/types"
 	"strings"
 )

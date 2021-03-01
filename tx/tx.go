@@ -3,9 +3,9 @@ package tx
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/JFJun/bifrost-go/expand"
-	"github.com/JFJun/bifrost-go/utils"
 	"github.com/JFJun/go-substrate-crypto/crypto"
+	"github.com/rjman-self/go-polkadot-rpc-client/expand"
+	"github.com/rjman-self/go-polkadot-rpc-client/utils"
 	"github.com/stafiprotocol/go-substrate-rpc-client/types"
 	"golang.org/x/crypto/blake2b"
 	"strings"
