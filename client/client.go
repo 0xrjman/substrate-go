@@ -190,6 +190,8 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 			log.Printf("parse %d block extrinsic error,Err=[%v]", blockResp.Height, err)
 		}
 	}()
+	//Whether the mark is a custom batch call
+	customFlag := false
 
 	for i, extrinsic := range extrinsics {
 		extrinsic = utils.Remove0X(extrinsic)
@@ -269,6 +271,8 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 											for _, arg := range value.CallArgs {
 												fmt.Printf("%v\n", arg)
 												if arg.Name == "_remark" {
+													//set the type of Extrinsic
+													customFlag = true
 													blockData := parseBlockExtrinsicParams{}
 													blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.prefix)
 													blockData.era = resp.Era
@@ -285,7 +289,6 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 										}
 									}
 								}
-
 								if value.CallModule == "Balances" {
 									if value.CallFunction == "transfer" || value.CallFunction == "transfer_keep_alive" {
 										if len(value.CallArgs) > 0 {
@@ -328,6 +331,9 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 	blockResp.Extrinsic = make([]*models.ExtrinsicResponse, len(params))
 	for idx, param := range params {
 		e := new(models.ExtrinsicResponse)
+		if idx == 1 && customFlag == true {
+			e.Type = "remark"
+		}
 		e.Signature = param.sig
 		e.FromAddress = param.from
 		e.ToAddress = param.to
@@ -347,6 +353,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 /*
 解析当前区块的System.event
 */
+
 func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.BlockResponse) error {
 	var (
 		storage types.StorageKey
@@ -421,7 +428,9 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 	}
 	for _, e := range blockResp.Extrinsic {
 		e.Status = "fail"
-		e.Type = "transfer"
+		if e.Type == "" {
+			e.Type = "transfer"
+		}
 		if len(res) > 0 {
 			for _, r := range res {
 				if e.ExtrinsicIndex == r.ExtrinsicIdx {
