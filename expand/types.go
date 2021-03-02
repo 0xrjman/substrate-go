@@ -72,9 +72,51 @@ func (v *Vec) ProcessVec(decoder scale.Decoder, subType interface{}) error {
 	return nil
 }
 
+func (v *Vec) ProcessFirstVec(decoder scale.Decoder, subType interface{}) error {
+	var u types.UCompact
+	err := decoder.Decode(&u)
+	if err != nil {
+		return fmt.Errorf("decode Vec: get length error: %v", err)
+	}
+	length := int(utils.UCompactToBigInt(u).Int64())
+	if length > 5000 {
+		return fmt.Errorf("vec length %d exceeds %d", length, 1000)
+	}
+	for i := 0; i < 1; i++ {
+		st := reflect.TypeOf(subType)
+		if st.Kind() != reflect.Struct {
+			return errors.New("decode Vec: struct type is not struct")
+		}
+		tmp := reflect.New(st)
+		subType := tmp.Interface()
+		err = decoder.Decode(subType)
+		if err != nil {
+			return fmt.Errorf("decode Vec: decoder subtype error: %v", err)
+		}
+		v.Value = append(v.Value, subType)
+	}
+	return nil
+}
+
+func (v *Vec) ProcessSecondVec(decoder scale.Decoder, subType interface{}) error {
+	st := reflect.TypeOf(subType)
+	if st.Kind() != reflect.Struct {
+		return errors.New("decode Vec: struct type is not struct")
+	}
+	tmp := reflect.New(st)
+	subType = tmp.Interface()
+	err := decoder.Decode(subType)
+	if err != nil {
+		return fmt.Errorf("decode Vec: decoder subtype error: %v", err)
+	}
+	v.Value = append(v.Value, subType)
+	return nil
+}
+
 /*
 解码包的问题，所以这里只能根据需求写死
 */
+
 type TransferCall struct {
 	Value interface{}
 }
@@ -120,6 +162,41 @@ func (t *TransferCall) Decode(decoder scale.Decoder) error {
 		})
 	result["call_args"] = param
 	t.Value = result
+	return nil
+}
+
+type RemarkCall struct {
+	Value interface{}
+}
+
+func (r *RemarkCall) Decode(decoder scale.Decoder) error {
+	//1. 先获取callidx
+	b := make([]byte, 2)
+	err := decoder.Read(b)
+	if err != nil {
+		return fmt.Errorf("deode transfer call: read callIdx bytes error: %v", err)
+	}
+	callIdx := xstrings.RightJustify(utils.IntToHex(b[0]), 2, "0") + xstrings.RightJustify(utils.IntToHex(b[1]), 2, "0")
+	result := map[string]interface{}{
+		"call_index": callIdx,
+	}
+	var param []ExtrinsicParam
+
+	var remark string
+	err = decoder.Decode(&remark)
+	if err != nil {
+		return fmt.Errorf("decode call: decode System.remark error: %v", err)
+	}
+
+	param = append(param,
+		ExtrinsicParam{
+			Name:     "_remark",
+			Type:     "String",
+			Value:    remark,
+			ValueRaw: remark,
+		})
+	result["call_args"] = param
+	r.Value = result
 	return nil
 }
 

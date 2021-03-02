@@ -250,46 +250,83 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 		}
 	case "Utility":
 		if callName == "batch" {
+			vec := new(Vec)
+			//BEGIN: Custom decode
+
+			// 1: Balances.Transfer
 			// 0--> calls   Vec<Call>
 			var tc TransferCall
-			vec := new(Vec)
-			err := vec.ProcessVec(decoder, tc)
+			err = vec.ProcessFirstVec(decoder, tc)
 			if err != nil {
-				return fmt.Errorf("decode call: decode Utility.batch error: %v", err)
+				return fmt.Errorf("decode call: decode Utility.batch => Balances.transfer error: %v", err)
 			}
+
+			// 2: System.remark
+			var rc RemarkCall
+			err := vec.ProcessSecondVec(decoder, rc)
+			if err != nil {
+				fmt.Print("decode call: decode Utility.batch => System.remark error: %v\n", err)
+			}
+
 			//utils.CheckStructData(vec.Value)
 			ep := ExtrinsicParam{}
 			ep.Name = "calls"
 			ep.Type = "Vec<Call>"
 			var result []interface{}
-			for _, value := range vec.Value {
-				tcv := value.(*TransferCall)
-				//检查一下是否为BalanceTransfer
-				data := tcv.Value.(map[string]interface{})
-				callIndex := data["call_index"].(string)
-				btCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer")
-				if err != nil {
-					return fmt.Errorf("decode Utility.batch: get  Balances.transfer call index error: %v", err)
-				}
-				btkaCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer_keep_alive")
-				if err != nil {
-					return fmt.Errorf("decode Utility.batch: get  Balances.transfer_keep_alive call index error: %v", err)
-				}
-				if callIndex == btCallIdx || callIndex == btkaCallIdx {
-					mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
+
+			for i, value := range vec.Value {
+				if i == 0 {
+					tcv := value.(*TransferCall)
+					//检查一下是否为BalanceTransfer
+					data := tcv.Value.(map[string]interface{})
+					callIndex := data["call_index"].(string)
+					btCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer")
 					if err != nil {
-						return fmt.Errorf("decode Utility.batch: get call index error: %v", err)
+						return fmt.Errorf("decode Utility.batch: get  Balances.transfer call index error: %v", err)
 					}
-					if mn != "Balances" {
-						return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)
+					btkaCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer_keep_alive")
+					if err != nil {
+						return fmt.Errorf("decode Utility.batch: get  Balances.transfer_keep_alive call index error: %v", err)
 					}
-					data["call_function"] = cn
-					data["call_module"] = mn
-					result = append(result, data)
+					if callIndex == btCallIdx || callIndex == btkaCallIdx {
+						mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
+						if err != nil {
+							return fmt.Errorf("decode Utility.batch: get call index error: %v", err)
+						}
+						if mn != "Balances" {
+							return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)
+						}
+						data["call_function"] = cn
+						data["call_module"] = mn
+						result = append(result, data)
+					}
+				}
+				if i == 1 {
+					tcv := value.(*RemarkCall)
+					//检查一下是否为System.remark
+					data := tcv.Value.(map[string]interface{})
+					callIndex := data["call_index"].(string)
+					srCallIdx, err := ed.me.MV.GetCallIndex("System", "remark")
+					if err != nil {
+						return fmt.Errorf("decode Utility.batch: get  Balances.transfer call index error: %v", err)
+					}
+					if callIndex == srCallIdx {
+						mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
+						if err != nil {
+							return fmt.Errorf("decode Utility.batch: get call index error: %v", err)
+						}
+						if mn != "System" {
+							return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)
+						}
+						data["call_function"] = cn
+						data["call_module"] = mn
+						result = append(result, data)
+					}
 				}
 			}
 			ep.Value = result
 			ed.Params = append(ed.Params, ep)
+
 		}
 	default:
 		// unsopport

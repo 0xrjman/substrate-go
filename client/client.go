@@ -10,7 +10,6 @@ import (
 	"github.com/rjman-self/go-polkadot-rpc-client/expand"
 	"github.com/rjman-self/go-polkadot-rpc-client/models"
 	"github.com/rjman-self/go-polkadot-rpc-client/utils"
-
 	gsrc "github.com/stafiprotocol/go-substrate-rpc-client"
 	gsClient "github.com/stafiprotocol/go-substrate-rpc-client/client"
 	"github.com/stafiprotocol/go-substrate-rpc-client/rpc"
@@ -26,7 +25,7 @@ type Client struct {
 	C                  *gsrc.SubstrateAPI
 	Meta               *types.Metadata
 	prefix             []byte //币种的前缀
-	ChainName          string //链名字
+	name               string //链名字
 	SpecVersion        int
 	TransactionVersion int
 	genesisHash        string
@@ -40,6 +39,7 @@ func New(url string) (*Client, error) {
 
 	// 初始化rpc客户端
 	c.C, err = gsrc.NewSubstrateAPI(url)
+	//api, err := gsrpc.NewSubstrateAPI(config.Default().RPCURL)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func (c *Client) checkRuntimeVersion() error {
 		}
 	}
 	c.TransactionVersion = int(v.TransactionVersion)
-	c.ChainName = v.SpecName
+	c.name = v.SpecName
 	specVersion := int(v.SpecVersion)
 	//检查metadata数据是否有升级
 	if specVersion != c.SpecVersion {
@@ -215,7 +215,6 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 		if err != nil {
 			return fmt.Errorf("json unmarshal extrinsic decode error: %v", err)
 		}
-
 		switch resp.CallModule {
 		case "System":
 			for _, param := range resp.Params {
@@ -223,7 +222,6 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 					var remark = param.Value.(string)
 					fmt.Printf("remark is %v\n", remark)
 				}
-
 			}
 		case "Timestamp":
 			for _, param := range resp.Params {
@@ -257,7 +255,6 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 					if param.Name == "calls" {
 						switch param.Value.(type) {
 						case []interface{}:
-
 							d, _ := json.Marshal(param.Value)
 							var values []models.UtilityParamsValue
 							err = json.Unmarshal(d, &values)
@@ -266,6 +263,29 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 							}
 
 							for _, value := range values {
+								if value.CallModule == "System" {
+									if value.CallFunction == "remark" {
+										if len(value.CallArgs) > 0 {
+											for _, arg := range value.CallArgs {
+												fmt.Printf("%v\n", arg)
+												if arg.Name == "_remark" {
+													blockData := parseBlockExtrinsicParams{}
+													blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.prefix)
+													blockData.era = resp.Era
+													blockData.sig = resp.Signature
+													blockData.nonce = resp.Nonce
+													blockData.extrinsicIdx = i
+													blockData.fee, _ = c.GetPartialFee(extrinsic, blockResp.ParentHash)
+													blockData.txid = c.createTxHash(extrinsic)
+													//blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.prefix)
+													blockData.to = arg.ValueRaw
+													params = append(params, blockData)
+												}
+											}
+										}
+									}
+								}
+
 								if value.CallModule == "Balances" {
 									if value.CallFunction == "transfer" || value.CallFunction == "transfer_keep_alive" {
 										if len(value.CallArgs) > 0 {
@@ -319,7 +339,6 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 		e.Txid = param.txid
 		e.ExtrinsicLength = param.length
 		blockResp.Extrinsic[idx] = e
-
 	}
 	//utils.CheckStructData(blockResp)
 	return nil
@@ -357,7 +376,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 		return fmt.Errorf("get storage data error: %v", err)
 	}
 	//解析event信息
-	ier, err := expand.DecodeEventRecords(c.Meta, result.(string), c.ChainName)
+	ier, err := expand.DecodeEventRecords(c.Meta, result.(string), c.name)
 	if err != nil {
 		return fmt.Errorf("decode event data error: %v", err)
 	}
@@ -376,7 +395,6 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 		}
 
 		for _, ebt := range ier.GetBalancesTransfer() {
-
 			if !ebt.Phase.IsApplyExtrinsic {
 				continue
 			}
@@ -464,7 +482,7 @@ func (c *Client) GetAccountInfo(address string) (*types.AccountInfo, error) {
 	}
 	var accountInfo types.AccountInfo
 	var ok bool
-	switch strings.ToLower(c.ChainName) {
+	switch strings.ToLower(c.name) {
 	// todo 目前这里先做硬编码先，后续在进行修改
 	case "polkadot":
 		var accountInfoProviders expand.AccountInfoWithProviders
