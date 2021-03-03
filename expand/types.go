@@ -20,6 +20,11 @@ type Balance struct {
 	Value  decimal.Decimal
 }
 
+type TimePointSafe32 struct {
+	Height types.OptionU32
+	Index  types.U32
+}
+
 func (b *Balance) Decode(decoder scale.Decoder) error {
 	buf := &bytes.Buffer{}
 	b.Reader = buf
@@ -360,7 +365,8 @@ func (d GenericMultiAddress) Encode(encoder scale.Encoder) error {
 }
 
 /*
-没办法，底层解析就是这样做的，只能这样写了，虽然很不友好
+No way, the underlying parsing is done like this
+it can only be written like this, although it is very unfriendly
 */
 func (d *GenericMultiAddress) GetTypes() int {
 	return d.types

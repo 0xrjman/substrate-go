@@ -220,12 +220,12 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 		if callName == "transfer" || callName == "transfer_keep_alive" {
 			// 0 ---> 	Address
 			var addrValue string
-			var address MultiAddress
+			var address types.AccountID
 			err = decoder.Decode(&address)
 			if err != nil {
 				return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v", err)
 			}
-			addrValue = utils.BytesToHex(address.AccountId[:])
+			addrValue = utils.BytesToHex(address[:])
 
 			ed.Params = append(ed.Params,
 				ExtrinsicParam{
@@ -248,11 +248,125 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 					Value: utils.UCompactToBigInt(b).Int64(),
 				})
 		}
+	case "Multisig":
+		if callName == "as_multi" {
+			//1. decode threshold
+			var threshold uint16
+			err = decoder.Decode(&threshold)
+			ed.Params = append(ed.Params,
+				ExtrinsicParam{
+					Name:  "threshold",
+					Type:  "uint16",
+					Value: threshold,
+				})
+
+			//2. decode otherSigner
+			var otherSignatories [2]string
+			var address []types.AccountID
+			//var bt byte
+			//err = decoder.Decode(&bt)
+			err = decoder.Decode(&address)
+			if err != nil {
+				return fmt.Errorf("decode call: decode Multi.as_multi.OtherSigner error: %v", err)
+			}
+			for i, add := range address {
+				otherSignatories[i] = utils.BytesToHex(add[:])
+			}
+
+			ed.Params = append(ed.Params,
+				ExtrinsicParam{
+					Name:  "other_signatories",
+					Type:  "vec<AccountId>",
+					Value: otherSignatories,
+				})
+
+			//3. docode TimePoint
+			tp := TimePointSafe32{}
+			err = decoder.Decode(&tp)
+			if err != nil {
+				return fmt.Errorf("decode call: decode Multi.as_multi.TimePoint error: %v", err)
+			}
+
+			ed.Params = append(ed.Params,
+				ExtrinsicParam{
+					Name:  "maybe_timepoint",
+					Type:  "TimePointSafe32",
+					Value: tp,
+				})
+
+			//4. decode call => transfer
+			vec := new(Vec)
+			var tc TransferCall
+			err = vec.ProcessFirstVec(decoder, tc)
+			if err != nil {
+				return fmt.Errorf("decode call: decode Utility.batch => Balances.transfer error: %v", err)
+			}
+
+			ep := ExtrinsicParam{}
+			ep.Name = "calls"
+			ep.Type = "Vec<Call>"
+			var result []interface{}
+
+			for _, value := range vec.Value {
+				tcv := value.(*TransferCall)
+				//检查一下是否为BalanceTransfer
+				data := tcv.Value.(map[string]interface{})
+				callIndex := data["call_index"].(string)
+				btCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer")
+				if err != nil {
+					return fmt.Errorf("decode Utility.batch: get  Balances.transfer call index error: %v", err)
+				}
+				btkaCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer_keep_alive")
+				if err != nil {
+					return fmt.Errorf("decode Utility.batch: get  Balances.transfer_keep_alive call index error: %v", err)
+				}
+				if callIndex == btCallIdx || callIndex == btkaCallIdx {
+					mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
+					if err != nil {
+						return fmt.Errorf("decode Utility.batch: get call index error: %v", err)
+					}
+					if mn != "Balances" {
+						return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)
+					}
+					data["call_function"] = cn
+					data["call_module"] = mn
+					result = append(result, data)
+				}
+				ep.Value = result
+				ed.Params = append(ed.Params, ep)
+			}
+			//5. decode store_call
+			var storeCall bool
+			err = decoder.Decode(&storeCall)
+			if err != nil {
+				fmt.Printf("decode call: decode Multi.as_multi.store_call error: %v", err)
+			}
+
+			ed.Params = append(ed.Params,
+				ExtrinsicParam{
+					Name:  "store_call",
+					Type:  "bool",
+					Value: storeCall,
+				})
+
+			//6. decode Weight
+			var maxWeight uint64
+			err = decoder.Decode(&maxWeight)
+			if err != nil {
+				fmt.Printf("decode call: decode Multi.as_multi.max_weight error: %v", err)
+			}
+
+			ed.Params = append(ed.Params,
+				ExtrinsicParam{
+					Name:  "max_weight",
+					Type:  "uint64",
+					Value: maxWeight,
+				})
+		}
 	case "Utility":
 		if callName == "batch" {
 			vec := new(Vec)
 			//BEGIN: Custom decode
-
 			// 1: Balances.Transfer
 			// 0--> calls   Vec<Call>
 			var tc TransferCall
@@ -265,7 +379,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 			var rc RemarkCall
 			err := vec.ProcessSecondVec(decoder, rc)
 			if err != nil {
-				fmt.Print("decode call: decode Utility.batch => System.remark error: %v\n", err)
+				fmt.Printf("decode call: decode Utility.batch => System.remark error: %v\n", err)
 			}
 
 			//utils.CheckStructData(vec.Value)
@@ -326,7 +440,6 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 			}
 			ep.Value = result
 			ed.Params = append(ed.Params, ep)
-
 		}
 	default:
 		// unsopport

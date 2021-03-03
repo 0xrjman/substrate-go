@@ -192,8 +192,6 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 			log.Printf("parse %d block extrinsic error,Err=[%v]", blockResp.Height, err)
 		}
 	}()
-	//Whether the mark is a custom batch call
-	//customFlag := false
 
 	for i, extrinsic := range extrinsics {
 		extrinsic = utils.Remove0X(extrinsic)
@@ -237,6 +235,26 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 			if resp.CallModuleFunction == "transfer" || resp.CallModuleFunction == "transfer_keep_alive" {
 				blockData := parseBlockExtrinsicParams{}
 				blockData.what = "transfer"
+				blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.prefix)
+				blockData.era = resp.Era
+				blockData.sig = resp.Signature
+				blockData.nonce = resp.Nonce
+				blockData.extrinsicIdx = i
+				blockData.fee, err = c.GetPartialFee(extrinsic, blockResp.ParentHash)
+
+				blockData.txid = c.createTxHash(extrinsic)
+				blockData.length = resp.Length
+				for _, param := range resp.Params {
+					if param.Name == "dest" {
+						blockData.to, _ = ss58.EncodeByPubHex(param.Value.(string), c.prefix)
+					}
+				}
+				params = append(params, blockData)
+			}
+		case "Multi":
+			if resp.CallModuleFunction == "as_multi" {
+				blockData := parseBlockExtrinsicParams{}
+				blockData.what = "as_multi"
 				blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.prefix)
 				blockData.era = resp.Era
 				blockData.sig = resp.Signature
