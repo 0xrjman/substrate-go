@@ -169,9 +169,11 @@ func (c *Client) GetBlockByHash(blockHash string) (*models.BlockResponse, error)
 }
 
 type parseBlockExtrinsicParams struct {
+	what                          string
 	from, to, sig, era, txid, fee string
 	nonce                         int64
 	extrinsicIdx, length          int
+	recipient                     string
 }
 
 /*
@@ -191,7 +193,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 		}
 	}()
 	//Whether the mark is a custom batch call
-	customFlag := false
+	//customFlag := false
 
 	for i, extrinsic := range extrinsics {
 		extrinsic = utils.Remove0X(extrinsic)
@@ -234,6 +236,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 		case "Balances":
 			if resp.CallModuleFunction == "transfer" || resp.CallModuleFunction == "transfer_keep_alive" {
 				blockData := parseBlockExtrinsicParams{}
+				blockData.what = "transfer"
 				blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.prefix)
 				blockData.era = resp.Era
 				blockData.sig = resp.Signature
@@ -253,6 +256,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 
 		case "Utility":
 			if resp.CallModuleFunction == "batch" {
+				blockData := parseBlockExtrinsicParams{}
 				for _, param := range resp.Params {
 					if param.Name == "calls" {
 						switch param.Value.(type) {
@@ -264,46 +268,37 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 								continue
 							}
 
-							for _, value := range values {
-								if value.CallModule == "System" {
-									if value.CallFunction == "remark" {
-										if len(value.CallArgs) > 0 {
-											for _, arg := range value.CallArgs {
-												fmt.Printf("%v\n", arg)
-												if arg.Name == "_remark" {
-													//set the type of Extrinsic
-													customFlag = true
-													blockData := parseBlockExtrinsicParams{}
-													blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.prefix)
-													blockData.era = resp.Era
-													blockData.sig = resp.Signature
-													blockData.nonce = resp.Nonce
-													blockData.extrinsicIdx = i
-													blockData.fee, _ = c.GetPartialFee(extrinsic, blockResp.ParentHash)
-													blockData.txid = c.createTxHash(extrinsic)
-													//blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.prefix)
-													blockData.to = arg.ValueRaw
-													params = append(params, blockData)
+							if values[0].CallFunction == "transfer" || values[0].CallFunction == "transfer_keep_alive" && values[1].CallFunction == "remark" {
+								blockData.what = "multiSignBatch"
+								blockData.extrinsicIdx = i
+
+								for _, value := range values {
+									if value.CallModule == "Balances" {
+										if value.CallFunction == "transfer" || value.CallFunction == "transfer_keep_alive" {
+											if len(value.CallArgs) > 0 {
+												for _, arg := range value.CallArgs {
+													if arg.Name == "dest" {
+														blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.prefix)
+														blockData.era = resp.Era
+														blockData.sig = resp.Signature
+														blockData.nonce = resp.Nonce
+														blockData.fee, _ = c.GetPartialFee(extrinsic, blockResp.ParentHash)
+														blockData.txid = c.createTxHash(extrinsic)
+														blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.prefix)
+													}
 												}
 											}
 										}
 									}
-								}
-								if value.CallModule == "Balances" {
-									if value.CallFunction == "transfer" || value.CallFunction == "transfer_keep_alive" {
-										if len(value.CallArgs) > 0 {
-											for _, arg := range value.CallArgs {
-												if arg.Name == "dest" {
-													blockData := parseBlockExtrinsicParams{}
-													blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.prefix)
-													blockData.era = resp.Era
-													blockData.sig = resp.Signature
-													blockData.nonce = resp.Nonce
-													blockData.extrinsicIdx = i
-													blockData.fee, _ = c.GetPartialFee(extrinsic, blockResp.ParentHash)
-													blockData.txid = c.createTxHash(extrinsic)
-													blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.prefix)
-													params = append(params, blockData)
+									if value.CallModule == "System" {
+										if value.CallFunction == "remark" {
+											if len(value.CallArgs) > 0 {
+												for _, arg := range value.CallArgs {
+													fmt.Printf("%v\n", arg)
+													if arg.Name == "_remark" {
+														blockData.recipient = arg.ValueRaw
+														//blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.prefix)
+													}
 												}
 											}
 										}
@@ -315,6 +310,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 						}
 					}
 				}
+				params = append(params, blockData)
 			}
 		default:
 			//todo  add another call_module 币种不同可能使用的call_module不一样
@@ -331,9 +327,8 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 	blockResp.Extrinsic = make([]*models.ExtrinsicResponse, len(params))
 	for idx, param := range params {
 		e := new(models.ExtrinsicResponse)
-		if idx == 1 && customFlag == true {
-			e.Type = "remark"
-		}
+		e.Type = param.what
+		e.Recipient = param.recipient
 		e.Signature = param.sig
 		e.FromAddress = param.from
 		e.ToAddress = param.to
@@ -440,7 +435,6 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 						} else {
 							e.Status = "success"
 						}
-						e.Type = "transfer"
 						e.Amount = r.Amount
 						e.ToAddress = r.To
 						//计算手续费

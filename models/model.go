@@ -41,6 +41,7 @@ type ExtrinsicResponse struct {
 	ExtrinsicIndex  int    `json:"extrinsic_index"`
 	EventIndex      int    `json:"event_index"`
 	ExtrinsicLength int    `json:"extrinsic_length"`
+	Recipient       string `json:"recipient"`
 }
 
 type EventResult struct {
