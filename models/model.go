@@ -1,5 +1,9 @@
 package models
 
+import (
+	"github.com/rjman-self/go-polkadot-rpc-client/expand"
+)
+
 type Bytes []byte
 type SignedBlock struct {
 	Block         Block `json:"block"`
@@ -28,20 +32,21 @@ type BlockResponse struct {
 }
 
 type ExtrinsicResponse struct {
-	Type            string `json:"type"`   //Transfer or another
-	Status          string `json:"status"` //success or fail
-	Txid            string `json:"txid"`
-	FromAddress     string `json:"from_address"`
-	ToAddress       string `json:"to_address"`
-	Amount          string `json:"amount"`
-	Fee             string `json:"fee"`
-	Signature       string `json:"signature"`
-	Nonce           int64  `json:"nonce"`
-	Era             string `json:"era"`
-	ExtrinsicIndex  int    `json:"extrinsic_index"`
-	EventIndex      int    `json:"event_index"`
-	ExtrinsicLength int    `json:"extrinsic_length"`
-	Recipient       string `json:"recipient"`
+	Type            string                 `json:"type"`   //Transfer or another
+	Status          string                 `json:"status"` //success or fail
+	Txid            string                 `json:"txid"`
+	FromAddress     string                 `json:"from_address"`
+	ToAddress       string                 `json:"to_address"`
+	Amount          string                 `json:"amount"`
+	Fee             string                 `json:"fee"`
+	Signature       string                 `json:"signature"`
+	Nonce           int64                  `json:"nonce"`
+	Era             string                 `json:"era"`
+	ExtrinsicIndex  int                    `json:"extrinsic_index"`
+	EventIndex      int                    `json:"event_index"`
+	ExtrinsicLength int                    `json:"extrinsic_length"`
+	Recipient       string                 `json:"recipient"`
+	MultiSigAsMulti expand.MultiSigAsMulti `json:"multisig"`
 }
 
 type EventResult struct {

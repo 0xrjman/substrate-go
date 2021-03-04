@@ -220,12 +220,12 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 		if callName == "transfer" || callName == "transfer_keep_alive" {
 			// 0 ---> 	Address
 			var addrValue string
-			var address types.AccountID
+			var address MultiAddress
 			err = decoder.Decode(&address)
 			if err != nil {
 				return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v", err)
 			}
-			addrValue = utils.BytesToHex(address[:])
+			addrValue = utils.BytesToHex(address.AccountId[:])
 
 			ed.Params = append(ed.Params,
 				ExtrinsicParam{
@@ -261,7 +261,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 				})
 
 			//2. decode otherSigner
-			var otherSignatories [2]string
+			var otherSignatories []string
 			var address []types.AccountID
 			//var bt byte
 			//err = decoder.Decode(&bt)
@@ -269,8 +269,8 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 			if err != nil {
 				return fmt.Errorf("decode call: decode Multi.as_multi.OtherSigner error: %v", err)
 			}
-			for i, add := range address {
-				otherSignatories[i] = utils.BytesToHex(add[:])
+			for _, add := range address {
+				otherSignatories = append(otherSignatories, utils.BytesToHex(add[:]))
 			}
 
 			ed.Params = append(ed.Params,
@@ -281,11 +281,22 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 				})
 
 			//3. docode TimePoint
-			tp := TimePointSafe32{}
-			err = decoder.Decode(&tp)
+			var tp []interface{}
+			var height types.OptionU32
+			var index types.U32
+
+			//tp := TimePointSafe32{}
+			err = decoder.Decode(&height)
+			err = decoder.Decode(&index)
 			if err != nil {
 				return fmt.Errorf("decode call: decode Multi.as_multi.TimePoint error: %v", err)
 			}
+			var isSafe, ht = height.Unwrap()
+			if !isSafe {
+				fmt.Errorf("TimePoint.Height is Not Safe!")
+			}
+			tp = append(tp, ht)
+			tp = append(tp, index)
 
 			ed.Params = append(ed.Params,
 				ExtrinsicParam{
@@ -296,8 +307,9 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 
 			//4. decode call => transfer
 			vec := new(Vec)
-			var tc TransferCall
-			err = vec.ProcessFirstVec(decoder, tc)
+			var tc TransferOpaqueCall
+			//err = vec.ProcessFirstVec(decoder, tc)
+			err = vec.ProcessOpaqueCallVec(decoder, tc)
 			if err != nil {
 				return fmt.Errorf("decode call: decode Utility.batch => Balances.transfer error: %v", err)
 			}
@@ -308,22 +320,25 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 			var result []interface{}
 
 			for _, value := range vec.Value {
-				tcv := value.(*TransferCall)
+				tcv := value.(*TransferOpaqueCall)
 				//检查一下是否为BalanceTransfer
 				data := tcv.Value.(map[string]interface{})
+				if data["call_index"].(string) == "0300" {
+					data["call_index"] = "0603"
+				}
 				callIndex := data["call_index"].(string)
 				btCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer")
 				if err != nil {
-					return fmt.Errorf("decode Utility.batch: get  Balances.transfer call index error: %v", err)
+					return fmt.Errorf("decode Multisig.as_multi: get  Multisig.as_multi call index error: %v", err)
 				}
 				btkaCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer_keep_alive")
 				if err != nil {
-					return fmt.Errorf("decode Utility.batch: get  Balances.transfer_keep_alive call index error: %v", err)
+					return fmt.Errorf("decode Multisig.as_multi: get  Balances.transfer_keep_alive call index error: %v", err)
 				}
 				if callIndex == btCallIdx || callIndex == btkaCallIdx {
 					mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
 					if err != nil {
-						return fmt.Errorf("decode Utility.batch: get call index error: %v", err)
+						return fmt.Errorf("decode Multisig.as_multi: get call index error: %v", err)
 					}
 					if mn != "Balances" {
 						return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)

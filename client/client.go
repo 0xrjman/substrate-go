@@ -174,6 +174,7 @@ type parseBlockExtrinsicParams struct {
 	nonce                         int64
 	extrinsicIdx, length          int
 	recipient                     string
+	multiSigAsMulti               expand.MultiSigAsMulti
 }
 
 /*
@@ -251,22 +252,104 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 				}
 				params = append(params, blockData)
 			}
-		case "Multi":
+		case "Multisig":
 			if resp.CallModuleFunction == "as_multi" {
 				blockData := parseBlockExtrinsicParams{}
 				blockData.what = "as_multi"
-				blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.prefix)
 				blockData.era = resp.Era
 				blockData.sig = resp.Signature
 				blockData.nonce = resp.Nonce
 				blockData.extrinsicIdx = i
 				blockData.fee, err = c.GetPartialFee(extrinsic, blockResp.ParentHash)
-
 				blockData.txid = c.createTxHash(extrinsic)
 				blockData.length = resp.Length
 				for _, param := range resp.Params {
-					if param.Name == "dest" {
-						blockData.to, _ = ss58.EncodeByPubHex(param.Value.(string), c.prefix)
+					if param.Name == "threshold" {
+						blockData.multiSigAsMulti.Threshold = uint16(param.Value.(float64))
+					}
+					if param.Name == "other_signatories" {
+						for _, value := range param.Value.([]interface{}) {
+							blockData.multiSigAsMulti.OtherSignatories = append(blockData.multiSigAsMulti.OtherSignatories, value.(string))
+						}
+					}
+					if param.Name == "maybe_timepoint" {
+						height := types.NewOptionU32(0)
+						index := types.NewU32(0)
+						for i, value := range param.Value.([]interface{}) {
+							if i == 0 {
+								height.SetSome(types.U32(value.(float64)))
+							}
+							if i == 1 {
+								index = types.U32(value.(float64))
+							}
+						}
+						var maybeTimePoint = expand.TimePointSafe32{
+							Height: height,
+							Index:  index,
+						}
+						blockData.multiSigAsMulti.MaybeTimePoint = maybeTimePoint
+						switch param.Value.(type) {
+						case map[string]interface{}:
+							d, _ := json.Marshal(param.Value)
+							var value expand.TimePointSafe32
+							err = json.Unmarshal(d, &value)
+							if err != nil {
+								continue
+							}
+
+							blockData.multiSigAsMulti.MaybeTimePoint.Height = value.Height
+							blockData.multiSigAsMulti.MaybeTimePoint.Index = value.Index
+
+						default:
+							continue
+						}
+					}
+					if param.Name == "calls" {
+						switch param.Value.(type) {
+						case []interface{}:
+							d, _ := json.Marshal(param.Value)
+							var values []models.UtilityParamsValue
+							err = json.Unmarshal(d, &values)
+							if err != nil {
+								continue
+							}
+
+							if values[0].CallFunction == "transfer" || values[0].CallFunction == "transfer_keep_alive" {
+								for _, value := range values {
+									if value.CallModule == "Balances" {
+										if value.CallFunction == "transfer" || value.CallFunction == "transfer_keep_alive" {
+											if len(value.CallArgs) > 0 {
+												for _, arg := range value.CallArgs {
+													if arg.Name == "dest" {
+														blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.prefix)
+														blockData.era = resp.Era
+														blockData.sig = resp.Signature
+														blockData.nonce = resp.Nonce
+														blockData.fee, _ = c.GetPartialFee(extrinsic, blockResp.ParentHash)
+														blockData.txid = c.createTxHash(extrinsic)
+														blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.prefix)
+														blockData.multiSigAsMulti.DestAddress, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.prefix)
+														blockData.recipient, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.prefix)
+													}
+													if arg.Name == "value" {
+														amount := arg.Value.(float64)
+														blockData.multiSigAsMulti.DestAmount = strconv.FormatFloat(amount, 'f', -1, 64)
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						default:
+							continue
+						}
+					}
+					if param.Name == "store_call" {
+						blockData.multiSigAsMulti.StoreCall = param.Value.(bool)
+					}
+					if param.Name == "max_weight" {
+						blockData.multiSigAsMulti.MaxWeight = uint64(param.Value.(float64))
 					}
 				}
 				params = append(params, blockData)
@@ -345,8 +428,13 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 	blockResp.Extrinsic = make([]*models.ExtrinsicResponse, len(params))
 	for idx, param := range params {
 		e := new(models.ExtrinsicResponse)
+		//custom struct
 		e.Type = param.what
 		e.Recipient = param.recipient
+		e.MultiSigAsMulti = param.multiSigAsMulti
+		e.Amount = param.multiSigAsMulti.DestAmount
+
+		//essential struct
 		e.Signature = param.sig
 		e.FromAddress = param.from
 		e.ToAddress = param.to
@@ -357,6 +445,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 		//e.Txid = txid
 		e.Txid = param.txid
 		e.ExtrinsicLength = param.length
+
 		blockResp.Extrinsic[idx] = e
 	}
 	//utils.CheckStructData(blockResp)

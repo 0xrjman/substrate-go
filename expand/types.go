@@ -20,6 +20,33 @@ type Balance struct {
 	Value  decimal.Decimal
 }
 
+type MultiSigAsMulti struct {
+	Threshold        uint16
+	OtherSignatories []string
+	MaybeTimePoint   TimePointSafe32
+	DestAddress      string
+	DestAmount       string
+	StoreCall        bool
+	MaxWeight        uint64
+}
+
+func (ms *MultiSigAsMulti) Error() string {
+	panic("New MultiSigAsMulti Error")
+}
+
+func (ms *MultiSigAsMulti) NewMultiSigAsMulti(threshold uint16, otherSignatories []string, maybeTimePoint TimePointSafe32,
+	destAddress string, destAmount string, storeCall bool, maxWeight uint64) error {
+	return &MultiSigAsMulti{
+		threshold,
+		otherSignatories,
+		maybeTimePoint,
+		destAddress,
+		destAmount,
+		storeCall,
+		maxWeight,
+	}
+}
+
 type TimePointSafe32 struct {
 	Height types.OptionU32
 	Index  types.U32
@@ -117,6 +144,38 @@ func (v *Vec) ProcessSecondVec(decoder scale.Decoder, subType interface{}) error
 	v.Value = append(v.Value, subType)
 	return nil
 }
+func (v *Vec) ProcessOpaqueCallVec(decoder scale.Decoder, subType interface{}) error {
+	var u types.UCompact
+	err := decoder.Decode(&u)
+	if err != nil {
+		return fmt.Errorf("decode Vec: get length error: %v", err)
+	}
+
+	var dropBool uint8
+	err = decoder.Decode(&dropBool)
+	if err != nil {
+		return fmt.Errorf("decode Vec: get bool error: %v", err)
+	}
+
+	length := int(utils.UCompactToBigInt(u).Int64())
+	if length > 5000 {
+		return fmt.Errorf("vec length %d exceeds %d", length, 1000)
+	}
+	for i := 0; i < 1; i++ {
+		st := reflect.TypeOf(subType)
+		if st.Kind() != reflect.Struct {
+			return errors.New("decode Vec: struct type is not struct")
+		}
+		tmp := reflect.New(st)
+		subType := tmp.Interface()
+		err = decoder.Decode(subType)
+		if err != nil {
+			return fmt.Errorf("decode Vec: decoder subtype error: %v", err)
+		}
+		v.Value = append(v.Value, subType)
+	}
+	return nil
+}
 
 /*
 解码包的问题，所以这里只能根据需求写死
@@ -150,6 +209,54 @@ func (t *TransferCall) Decode(decoder scale.Decoder) error {
 			Type:     "Address",
 			Value:    utils.BytesToHex(address.AccountId[:]),
 			ValueRaw: utils.BytesToHex(address.AccountId[:]),
+		})
+	// 1 ----> Compact<Balance>
+	var bb types.UCompact
+
+	err = decoder.Decode(&bb)
+	if err != nil {
+		return fmt.Errorf("decode call: decode Balances.transfer.Compact<Balance> error: %v", err)
+	}
+	v := utils.UCompactToBigInt(bb).Int64()
+	param = append(param,
+		ExtrinsicParam{
+			Name:  "value",
+			Type:  "Compact<Balance>",
+			Value: v,
+		})
+	result["call_args"] = param
+	t.Value = result
+	return nil
+}
+
+type TransferOpaqueCall struct {
+	Value interface{}
+}
+
+func (t *TransferOpaqueCall) Decode(decoder scale.Decoder) error {
+	//1. 先获取callidx
+	b := make([]byte, 2)
+	err := decoder.Read(b)
+	if err != nil {
+		return fmt.Errorf("deode transfer call: read callIdx bytes error: %v", err)
+	}
+	callIdx := xstrings.RightJustify(utils.IntToHex(b[0]), 2, "0") + xstrings.RightJustify(utils.IntToHex(b[1]), 2, "0")
+	result := map[string]interface{}{
+		"call_index": callIdx,
+	}
+	var param []ExtrinsicParam
+	// 0 ---> 	Address
+	var address types.AccountID
+	err = decoder.Decode(&address)
+	if err != nil {
+		return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v", err)
+	}
+	param = append(param,
+		ExtrinsicParam{
+			Name:     "dest",
+			Type:     "Address",
+			Value:    utils.BytesToHex(address[:]),
+			ValueRaw: utils.BytesToHex(address[:]),
 		})
 	// 1 ----> Compact<Balance>
 	var bb types.UCompact
