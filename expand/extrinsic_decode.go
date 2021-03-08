@@ -281,22 +281,35 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 				})
 
 			//3. docode TimePoint
-			var tp []interface{}
-			var height types.OptionU32
-			var index types.U32
+			var tp []uint32
+			var option []byte
 
 			//tp := TimePointSafe32{}
-			err = decoder.Decode(&height)
-			err = decoder.Decode(&index)
-			if err != nil {
-				return fmt.Errorf("decode call: decode Multi.as_multi.TimePoint error: %v", err)
+			//err = decoder.Decode(&option)
+			//fmt.Printf("err is %v\n", err)
+
+			var hasValue bool
+			err := decoder.DecodeOption(&hasValue, option)
+			fmt.Printf("timePoint is %v\n", err)
+
+			if hasValue {
+				var height uint32
+				var index uint32
+
+				err = decoder.Decode(&height)
+				err = decoder.Decode(&index)
+
+				//blockNumber := types.NewOptionU32(height)
+
+				//if !option {
+				//	fmt.Errorf("TimePoint.Height is Not Safe!")
+				//}
+
+				tp = append(tp, height)
+				tp = append(tp, index)
+			} else {
+				tp = nil
 			}
-			var isSafe, ht = height.Unwrap()
-			if !isSafe {
-				fmt.Errorf("TimePoint.Height is Not Safe!")
-			}
-			tp = append(tp, ht)
-			tp = append(tp, index)
 
 			ed.Params = append(ed.Params,
 				ExtrinsicParam{

@@ -266,15 +266,20 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 				for _, param := range resp.Params {
 					if param.Name == "threshold" {
 						blockData.multiSigAsMulti.Threshold = uint16(param.Value.(float64))
+						continue
 					}
 					if param.Name == "other_signatories" {
 						for _, value := range param.Value.([]interface{}) {
 							blockData.multiSigAsMulti.OtherSignatories = append(blockData.multiSigAsMulti.OtherSignatories, value.(string))
 						}
+						continue
 					}
 					if param.Name == "maybe_timepoint" {
 						height := types.NewOptionU32(0)
 						index := types.NewU32(0)
+						if param.Value == nil {
+							continue
+						}
 						for i, value := range param.Value.([]interface{}) {
 							if i == 0 {
 								height.SetSome(types.U32(value.(float64)))
@@ -288,21 +293,22 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 							Index:  index,
 						}
 						blockData.multiSigAsMulti.MaybeTimePoint = maybeTimePoint
-						switch param.Value.(type) {
-						case map[string]interface{}:
-							d, _ := json.Marshal(param.Value)
-							var value expand.TimePointSafe32
-							err = json.Unmarshal(d, &value)
-							if err != nil {
-								continue
-							}
 
-							blockData.multiSigAsMulti.MaybeTimePoint.Height = value.Height
-							blockData.multiSigAsMulti.MaybeTimePoint.Index = value.Index
-
-						default:
-							continue
-						}
+						//switch param.Value.(type) {
+						//case map[string]interface{}:
+						//	d, _ := json.Marshal(param.Value)
+						//	var value expand.TimePointSafe32
+						//	err = json.Unmarshal(d, &value)
+						//	if err != nil {
+						//		continue
+						//	}
+						//
+						//	blockData.multiSigAsMulti.MaybeTimePoint.Height = value.Height
+						//	blockData.multiSigAsMulti.MaybeTimePoint.Index = value.Index
+						//
+						//default:
+						//	continue
+						//}
 					}
 					if param.Name == "calls" {
 						switch param.Value.(type) {
@@ -328,8 +334,9 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 														blockData.fee, _ = c.GetPartialFee(extrinsic, blockResp.ParentHash)
 														blockData.txid = c.createTxHash(extrinsic)
 														blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.prefix)
-														blockData.multiSigAsMulti.DestAddress, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.prefix)
-														blockData.recipient, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.prefix)
+														//blockData.multiSigAsMulti.DestAddress, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.prefix)
+														blockData.recipient = arg.ValueRaw
+														blockData.multiSigAsMulti.DestAddress = arg.ValueRaw
 													}
 													if arg.Name == "value" {
 														amount := arg.Value.(float64)

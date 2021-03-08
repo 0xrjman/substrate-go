@@ -16,7 +16,7 @@ func Test_GetBlockByNumber(t *testing.T) {
 
 	c.SetPrefix(ss58.PolkadotPrefix)
 	//expand.SetSerDeOptions(false)
-	resp, err := c.GetBlockByNumber(58492)
+	resp, err := c.GetBlockByNumber(19871)
 	if err != nil {
 		t.Fatal(err)
 	}
