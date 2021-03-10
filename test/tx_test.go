@@ -62,7 +62,7 @@ func Test_Tx2(t *testing.T) {
 	}
 	//9. 提交交易
 	var result interface{}
-	err = c.C.Client.Call(&result, "author_submitExtrinsic", sig)
+	err = c.Api.Client.Call(&result, "author_submitExtrinsic", sig)
 	if err != nil {
 		t.Fatal(err)
 	}

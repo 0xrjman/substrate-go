@@ -180,6 +180,8 @@ github.com/prometheus/tsdb v0.6.2-0.20190402121629-4f204dcbc150/go.mod h1:qhTCs0
 github.com/rjeczalik/notify v0.9.1/go.mod h1:rKwnCoCGeuQnwBtTSPL9Dad03Vh2n40ePRrjvIXnJho=
 github.com/rjmand/go-substrate-rpc-client/v2 v2.3.0 h1:fxBx5lsajpKHdwUfLK2hYVCkBWpC3IgQNWW0boyjSdU=
 github.com/rjmand/go-substrate-rpc-client/v2 v2.3.0/go.mod h1:WFbPfrrU/pDYLUfNBEPFlkeYVQ4+/8au8UKt6WshiyI=
+github.com/rjmand/go-substrate-rpc-client/v2 v2.4.0 h1:Qw0UKycICMtX49Hyzejk4Dtq4v9kO2ZuDKTWsz+tW4Y=
+github.com/rjmand/go-substrate-rpc-client/v2 v2.4.0/go.mod h1:WFbPfrrU/pDYLUfNBEPFlkeYVQ4+/8au8UKt6WshiyI=
 github.com/rs/cors v0.0.0-20160617231935-a62a804a8a00/go.mod h1:gFx+x8UowdsKA9AchylcLynDq+nNFfI8FkUZdN/jGCU=
 github.com/rs/cors v1.6.0 h1:G9tHG9lebljV9mfp9SNPDL36nCDxmo3zTlAf1YgvzmI=
 github.com/rs/cors v1.6.0/go.mod h1:gFx+x8UowdsKA9AchylcLynDq+nNFfI8FkUZdN/jGCU=
