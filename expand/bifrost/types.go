@@ -3,8 +3,8 @@ package bifrost
 import (
 	"fmt"
 	"github.com/rjman-self/go-polkadot-rpc-client/expand/base"
-	"github.com/stafiprotocol/go-substrate-rpc-client/scale"
-	"github.com/stafiprotocol/go-substrate-rpc-client/types"
+	"github.com/rjmand/go-substrate-rpc-client/v2/scale"
+	"github.com/rjmand/go-substrate-rpc-client/v2/types"
 )
 
 type BifrostEventRecords struct {

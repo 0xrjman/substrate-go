@@ -6,7 +6,7 @@ import (
 	"github.com/JFJun/go-substrate-crypto/crypto"
 	"github.com/rjman-self/go-polkadot-rpc-client/expand"
 	"github.com/rjman-self/go-polkadot-rpc-client/utils"
-	"github.com/stafiprotocol/go-substrate-rpc-client/types"
+	"github.com/rjmand/go-substrate-rpc-client/v2/types"
 	"golang.org/x/crypto/blake2b"
 	"strings"
 )

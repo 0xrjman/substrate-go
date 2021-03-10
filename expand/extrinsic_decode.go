@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"github.com/huandu/xstrings"
 	"github.com/rjman-self/go-polkadot-rpc-client/utils"
-	"github.com/stafiprotocol/go-substrate-rpc-client/scale"
-	"github.com/stafiprotocol/go-substrate-rpc-client/types"
+	"github.com/rjmand/go-substrate-rpc-client/v2/scale"
+	"github.com/rjmand/go-substrate-rpc-client/v2/types"
 )
 
 type ExtrinsicDecoder struct {

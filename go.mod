@@ -4,8 +4,9 @@ go 1.15
 
 require (
 	github.com/JFJun/go-substrate-crypto v1.0.1
+	github.com/centrifuge/go-substrate-rpc-client/v2 v2.1.0 // indirect
 	github.com/huandu/xstrings v1.3.2
+	github.com/rjmand/go-substrate-rpc-client/v2 v2.3.0
 	github.com/shopspring/decimal v1.2.0
-	github.com/stafiprotocol/go-substrate-rpc-client v1.0.3
-	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
+	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 )

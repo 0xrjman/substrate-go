@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/JFJun/go-substrate-crypto/ss58"
-	"github.com/stafiprotocol/go-substrate-rpc-client/types"
+	"github.com/rjmand/go-substrate-rpc-client/v2/types"
 	"math/big"
 	"strings"
 )

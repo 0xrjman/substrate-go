@@ -3,7 +3,7 @@ package expand
 import (
 	"github.com/rjman-self/go-polkadot-rpc-client/expand/bifrost"
 	"github.com/rjman-self/go-polkadot-rpc-client/expand/polkadot"
-	"github.com/stafiprotocol/go-substrate-rpc-client/types"
+	"github.com/rjmand/go-substrate-rpc-client/v2/types"
 	"strings"
 )
 
