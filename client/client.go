@@ -24,25 +24,25 @@ import (
 )
 
 type Client struct {
-	api                *gsrc.SubstrateAPI
-	meta               *types.Metadata
-	prefix             []byte //币种的前缀
-	name               string //链名字
-	specVersion        int
-	transactionVersion int
-	genesisHash        string
-	url                string
-	metaLock           sync.RWMutex           // Lock metadata for updates, allows concurrent reads
+	Api                *gsrc.SubstrateAPI
+	Meta               *types.Metadata
+	Prefix             []byte //币种的前缀
+	Name               string //链名字
+	SpecVersion        int
+	TransactionVersion int
+	GenesisHash        string
+	Url                string
+	MetaLock           sync.RWMutex // Lock metadata for updates, allows concurrent reads
 }
 
 func New(url string) (*Client, error) {
 	c := new(Client)
-	c.url = url
+	c.Url = url
 	var err error
 
 	// 初始化rpc客户端
-	c.api, err = gsrc.NewSubstrateAPI(url)
-	//api, err := gsrpc.NewSubstrateAPI(config.Default().RPCURL)
+	c.Api, err = gsrc.NewSubstrateAPI(url)
+	//Api, err := gsrpc.NewSubstrateAPI(config.Default().RPCURL)
 	if err != nil {
 		return nil, err
 	}
@@ -51,12 +51,12 @@ func New(url string) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.prefix = ss58.BifrostPrefix
+	c.Prefix = ss58.BifrostPrefix
 	return c, nil
 }
 
 func (c *Client) reConnectWs() (*gsrc.SubstrateAPI, error) {
-	cl, err := gsClient.Connect(c.url)
+	cl, err := gsClient.Connect(c.Url)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (c *Client) reConnectWs() (*gsrc.SubstrateAPI, error) {
 }
 
 func (c *Client) checkRuntimeVersion() error {
-	v, err := c.api.RPC.State.GetRuntimeVersionLatest()
+	v, err := c.Api.RPC.State.GetRuntimeVersionLatest()
 	if err != nil {
 		if !strings.Contains(err.Error(), "tls: use of closed connection") {
 			return fmt.Errorf("init runtime version error,err=%v", err)
@@ -81,22 +81,22 @@ func (c *Client) checkRuntimeVersion() error {
 		if err != nil {
 			return fmt.Errorf("reconnect error: %v", err)
 		}
-		c.api = cl
-		v, err = c.api.RPC.State.GetRuntimeVersionLatest()
+		c.Api = cl
+		v, err = c.Api.RPC.State.GetRuntimeVersionLatest()
 		if err != nil {
 			return fmt.Errorf("init runtime version error,aleady reconnect,err: %v", err)
 		}
 	}
-	c.transactionVersion = int(v.TransactionVersion)
-	c.name = v.SpecName
+	c.TransactionVersion = int(v.TransactionVersion)
+	c.Name = v.SpecName
 	specVersion := int(v.SpecVersion)
 	//检查metadata数据是否有升级
-	if specVersion != c.specVersion {
-		c.meta, err = c.api.RPC.State.GetMetadataLatest()
+	if specVersion != c.SpecVersion {
+		c.Meta, err = c.Api.RPC.State.GetMetadataLatest()
 		if err != nil {
 			return fmt.Errorf("init metadata error: %v", err)
 		}
-		c.specVersion = specVersion
+		c.SpecVersion = specVersion
 	}
 	return nil
 }
@@ -105,14 +105,14 @@ func (c *Client) checkRuntimeVersion() error {
 获取创世区块hash
 */
 func (c *Client) GetGenesisHash() string {
-	if c.genesisHash != "" {
-		return c.genesisHash
+	if c.GenesisHash != "" {
+		return c.GenesisHash
 	}
-	hash, err := c.api.RPC.Chain.GetBlockHash(0)
+	hash, err := c.Api.RPC.Chain.GetBlockHash(0)
 	if err != nil {
 		return ""
 	}
-	c.genesisHash = hash.Hex()
+	c.GenesisHash = hash.Hex()
 	return hash.Hex()
 }
 
@@ -120,14 +120,14 @@ func (c *Client) GetGenesisHash() string {
 自定义设置prefix，如果启动时加载的prefix是错误的，则需要手动配置prefix
 */
 func (c *Client) SetPrefix(prefix []byte) {
-	c.prefix = prefix
+	c.Prefix = prefix
 }
 
 /*
 根据height解析block，返回block是否包含交易
 */
 func (c *Client) GetBlockByNumber(height int64) (*models.BlockResponse, error) {
-	hash, err := c.api.RPC.Chain.GetBlockHash(uint64(height))
+	hash, err := c.Api.RPC.Chain.GetBlockHash(uint64(height))
 	if err != nil {
 		return nil, fmt.Errorf("get block hash error:%v,height:%d", err, height)
 	}
@@ -148,7 +148,7 @@ func (c *Client) GetBlockByHash(blockHash string) (*models.BlockResponse, error)
 	if err != nil {
 		return nil, err
 	}
-	err = c.api.Client.Call(&block, "chain_getBlock", blockHash)
+	err = c.Api.Client.Call(&block, "chain_getBlock", blockHash)
 	if err != nil {
 		return nil, fmt.Errorf("get block error: %v", err)
 	}
@@ -204,7 +204,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 			return fmt.Errorf("hex.decode extrinsic error: %v", err)
 		}
 		decoder := scale.NewDecoder(bytes.NewReader(data))
-		ed, err := expand.NewExtrinsicDecoder(c.meta)
+		ed, err := expand.NewExtrinsicDecoder(c.Meta)
 		if err != nil {
 			return fmt.Errorf("new extrinsic decode error: %v", err)
 		}
@@ -239,7 +239,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 			if resp.CallModuleFunction == "transfer" || resp.CallModuleFunction == "transfer_keep_alive" {
 				blockData := parseBlockExtrinsicParams{}
 				blockData.what = "transfer"
-				blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.prefix)
+				blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.Prefix)
 				blockData.era = resp.Era
 				blockData.sig = resp.Signature
 				blockData.nonce = resp.Nonce
@@ -250,7 +250,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 				blockData.length = resp.Length
 				for _, param := range resp.Params {
 					if param.Name == "dest" {
-						blockData.to, _ = ss58.EncodeByPubHex(param.Value.(string), c.prefix)
+						blockData.to, _ = ss58.EncodeByPubHex(param.Value.(string), c.Prefix)
 					}
 				}
 				params = append(params, blockData)
@@ -330,14 +330,14 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 											if len(value.CallArgs) > 0 {
 												for _, arg := range value.CallArgs {
 													if arg.Name == "dest" {
-														blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.prefix)
+														blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.Prefix)
 														blockData.era = resp.Era
 														blockData.sig = resp.Signature
 														blockData.nonce = resp.Nonce
 														blockData.fee, _ = c.GetPartialFee(extrinsic, blockResp.ParentHash)
 														blockData.txid = c.createTxHash(extrinsic)
-														blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.prefix)
-														//blockData.multiSigAsMulti.DestAddress, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.prefix)
+														blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
+														//blockData.multiSigAsMulti.DestAddress, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
 														blockData.recipient = arg.ValueRaw
 														blockData.multiSigAsMulti.DestAddress = arg.ValueRaw
 													}
@@ -389,13 +389,13 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 											if len(value.CallArgs) > 0 {
 												for _, arg := range value.CallArgs {
 													if arg.Name == "dest" {
-														blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.prefix)
+														blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.Prefix)
 														blockData.era = resp.Era
 														blockData.sig = resp.Signature
 														blockData.nonce = resp.Nonce
 														blockData.fee, _ = c.GetPartialFee(extrinsic, blockResp.ParentHash)
 														blockData.txid = c.createTxHash(extrinsic)
-														blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.prefix)
+														blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
 													}
 												}
 											}
@@ -408,7 +408,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 													fmt.Printf("%v\n", arg)
 													if arg.Name == "_remark" {
 														blockData.recipient = arg.ValueRaw
-														//blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.prefix)
+														//blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
 													}
 												}
 											}
@@ -481,7 +481,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 		return nil
 	}
 	// 1. 先创建System.event的storageKey
-	storage, err = types.CreateStorageKey(c.meta, "System", "Events", nil, nil)
+	storage, err = types.CreateStorageKey(c.Meta, "System", "Events", nil, nil)
 	if err != nil {
 		return fmt.Errorf("create storage key error: %v", err)
 	}
@@ -490,12 +490,12 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 	/*
 		根据storageKey以及blockHash获取当前区块的event信息
 	*/
-	err = c.api.Client.Call(&result, "state_getStorageAt", key, blockHash)
+	err = c.Api.Client.Call(&result, "state_getStorageAt", key, blockHash)
 	if err != nil {
 		return fmt.Errorf("get storage data error: %v", err)
 	}
 	//解析event信息
-	ier, err := expand.DecodeEventRecords(c.meta, result.(string), c.name)
+	ier, err := expand.DecodeEventRecords(c.Meta, result.(string), c.Name)
 	if err != nil {
 		return fmt.Errorf("decode event data error: %v", err)
 	}
@@ -533,7 +533,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 			var r models.EventResult
 			r.ExtrinsicIdx = extrinsicIdx
 			fromHex := hex.EncodeToString(em.Who[:])
-			r.From, err = ss58.EncodeByPubHex(fromHex, c.prefix)
+			r.From, err = ss58.EncodeByPubHex(fromHex, c.Prefix)
 			if err != nil {
 				r.From = ""
 				continue
@@ -552,7 +552,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 			var r models.EventResult
 			r.ExtrinsicIdx = extrinsicIdx
 			fromHex := hex.EncodeToString(em.Who[:])
-			r.From, err = ss58.EncodeByPubHex(fromHex, c.prefix)
+			r.From, err = ss58.EncodeByPubHex(fromHex, c.Prefix)
 			if err != nil {
 				r.From = ""
 				continue
@@ -572,7 +572,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 			var r models.EventResult
 			r.ExtrinsicIdx = extrinsicIdx
 			fromHex := hex.EncodeToString(em.Who[:])
-			r.From, err = ss58.EncodeByPubHex(fromHex, c.prefix)
+			r.From, err = ss58.EncodeByPubHex(fromHex, c.Prefix)
 			if err != nil {
 				r.From = ""
 				continue
@@ -592,7 +592,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 			var r models.EventResult
 			r.ExtrinsicIdx = extrinsicIdx
 			fromHex := hex.EncodeToString(em.Who[:])
-			r.From, err = ss58.EncodeByPubHex(fromHex, c.prefix)
+			r.From, err = ss58.EncodeByPubHex(fromHex, c.Prefix)
 			if err != nil {
 				r.From = ""
 				continue
@@ -612,14 +612,14 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 			var r models.EventResult
 			r.ExtrinsicIdx = extrinsicIdx
 			fromHex := hex.EncodeToString(ebt.From[:])
-			r.From, err = ss58.EncodeByPubHex(fromHex, c.prefix)
+			r.From, err = ss58.EncodeByPubHex(fromHex, c.Prefix)
 			if err != nil {
 				r.From = ""
 				continue
 			}
 			toHex := hex.EncodeToString(ebt.To[:])
 
-			r.To, err = ss58.EncodeByPubHex(toHex, c.prefix)
+			r.To, err = ss58.EncodeByPubHex(toHex, c.Prefix)
 			if err != nil {
 				r.To = ""
 				continue
@@ -736,17 +736,17 @@ func (c *Client) GetAccountInfo(address string) (*types.AccountInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ss58 decode address error: %v", err)
 	}
-	storage, err = types.CreateStorageKey(c.meta, "System", "Account", pub, nil)
+	storage, err = types.CreateStorageKey(c.Meta, "System", "Account", pub, nil)
 	if err != nil {
 		return nil, fmt.Errorf("create System.Account storage error: %v", err)
 	}
 	var accountInfo types.AccountInfo
 	var ok bool
-	switch strings.ToLower(c.name) {
+	switch strings.ToLower(c.Name) {
 	// todo 目前这里先做硬编码先，后续在进行修改
 	case "polkadot":
 		var accountInfoProviders expand.AccountInfoWithProviders
-		ok, err = c.api.RPC.State.GetStorageLatest(storage, &accountInfoProviders)
+		ok, err = c.Api.RPC.State.GetStorageLatest(storage, &accountInfoProviders)
 		if err != nil || !ok {
 			return nil, fmt.Errorf("get account info error: %v", err)
 		}
@@ -757,7 +757,7 @@ func (c *Client) GetAccountInfo(address string) (*types.AccountInfo, error) {
 		accountInfo.Data.MiscFrozen = accountInfoProviders.Data.MiscFrozen
 		accountInfo.Data.Reserved = accountInfoProviders.Data.Reserved
 	default:
-		ok, err = c.api.RPC.State.GetStorageLatest(storage, &accountInfo)
+		ok, err = c.Api.RPC.State.GetStorageLatest(storage, &accountInfo)
 		if err != nil || !ok {
 			return nil, fmt.Errorf("get account info error: %v", err)
 		}
@@ -774,7 +774,7 @@ func (c *Client) GetPartialFee(extrinsic, parentHash string) (string, error) {
 		extrinsic = "0x" + extrinsic
 	}
 	var result map[string]interface{}
-	err := c.api.Client.Call(&result, "payment_queryInfo", extrinsic, parentHash)
+	err := c.Api.Client.Call(&result, "payment_queryInfo", extrinsic, parentHash)
 	if err != nil {
 		return "", fmt.Errorf("get payment info error: %v", err)
 	}
