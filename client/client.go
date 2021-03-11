@@ -20,7 +20,6 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 type Client struct {
@@ -32,7 +31,6 @@ type Client struct {
 	TransactionVersion int
 	GenesisHash        string
 	Url                string
-	MetaLock           sync.RWMutex // Lock metadata for updates, allows concurrent reads
 }
 
 func New(url string) (*Client, error) {
