@@ -289,8 +289,8 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 			//fmt.Printf("err is %v\n", err)
 
 			var hasValue bool
-			err := decoder.DecodeOption(&hasValue, option)
-			fmt.Printf("timePoint is %v\n", err)
+			_ = decoder.DecodeOption(&hasValue, option)
+			//fmt.Printf("timePoint is %v\n", err)
 
 			if hasValue {
 				var height uint32
@@ -334,17 +334,20 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 
 			for _, value := range vec.Value {
 				tcv := value.(*TransferOpaqueCall)
-				//检查一下是否为BalanceTransfer
-				data := tcv.Value.(map[string]interface{})
-				if data["call_index"].(string) == "0300" {
-					data["call_index"] = "0603"
-				}
-				callIndex := data["call_index"].(string)
 				btCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer")
 				if err != nil {
 					return fmt.Errorf("decode Multisig.as_multi: get  Multisig.as_multi call index error: %v", err)
 				}
 				btkaCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer_keep_alive")
+
+				//检查一下是否为BalanceTransfer
+				data := tcv.Value.(map[string]interface{})
+				if data["call_index"].(string) == "0300" || data["call_index"].(string) == "0000" {
+					//Polkadot是0503,substrate是0603
+					data["call_index"] = btCallIdx
+				}
+				callIndex := data["call_index"].(string)
+
 				if err != nil {
 					return fmt.Errorf("decode Multisig.as_multi: get  Balances.transfer_keep_alive call index error: %v", err)
 				}

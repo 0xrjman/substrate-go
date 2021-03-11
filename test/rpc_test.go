@@ -16,7 +16,7 @@ func Test_GetBlockByNumber(t *testing.T) {
 
 	c.SetPrefix(ss58.PolkadotPrefix)
 	//expand.SetSerDeOptions(false)
-	resp, err := c.GetBlockByNumber(79327)
+	resp, err := c.GetBlockByNumber(2286)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,7 +25,7 @@ func Test_GetBlockByNumber(t *testing.T) {
 }
 
 func Test_GetAccountInfo(t *testing.T) {
-	c, err := client.New("ws://127.0.0.1:9944")
+	c, err := client.New("ws://127.0.0.1:41545")
 	if err != nil {
 		t.Fatal(err)
 	}

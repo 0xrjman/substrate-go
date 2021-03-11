@@ -57,6 +57,27 @@ type BifrostEventRecords struct {
 	Voucher_IssuedVoucher                     []EventVoucherIssuedVoucher
 	Voucher_DestroyedVoucher                  []EventVoucherDestroyedVoucher
 }
+
+func (b BifrostEventRecords) GetMultisigNewMultisig() []types.EventMultisigNewMultisig {
+	return b.Multisig_NewMultisig
+}
+
+func (b BifrostEventRecords) GetMultisigApproval() []types.EventMultisigApproval {
+	return b.Multisig_MultisigApproval
+}
+
+func (b BifrostEventRecords) GetMultisigExecuted() []types.EventMultisigExecuted {
+	return b.Multisig_MultisigExecuted
+}
+
+func (b BifrostEventRecords) GetMultisigCancelled() []types.EventMultisigCancelled {
+	return b.Multisig_MultisigCancelled
+}
+
+func (b BifrostEventRecords) GetUtilityBatchCompleted() []types.EventUtilityBatchCompleted {
+	return b.Utility_BatchCompleted
+}
+
 type EventVoucherDestroyedVoucher struct {
 	Phase   types.Phase
 	Who     types.AccountID

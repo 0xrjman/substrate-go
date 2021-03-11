@@ -5,6 +5,13 @@ import (
 	"github.com/rjmand/go-substrate-rpc-client/v2/types"
 )
 
+/// Polkadot MultiSignExtrinsic Type
+var AsMultiNew = "as_multi_new"
+var AsMultiApprove = "as_multi_approve"
+var AsMultiExecuted = "as_multi_executed"
+var AsMultiCancelled = "as_multi_cancelled"
+var UtilityBatch = "multi_sign_batch"
+
 type PolkadotEventRecords struct {
 	types.EventRecords
 	Claims_Claimed                    []EventClaimsClaimed
@@ -15,6 +22,26 @@ type PolkadotEventRecords struct {
 	ElectionsPhragmen_EmptyTerm       []EventElectionsPhragmenEmptyTerm
 	//ElectionsPhragmen_NewTerm		[]EventElectionsPhragmenNewTerm		暂不支持解析
 	Democracy_Blacklisted []EventDemocracyBlacklisted
+}
+
+func (p PolkadotEventRecords) GetMultisigNewMultisig() []types.EventMultisigNewMultisig {
+	return p.Multisig_NewMultisig
+}
+
+func (p PolkadotEventRecords) GetMultisigApproval() []types.EventMultisigApproval {
+	return p.Multisig_MultisigApproval
+}
+
+func (p PolkadotEventRecords) GetMultisigExecuted() []types.EventMultisigExecuted {
+	return p.Multisig_MultisigExecuted
+}
+
+func (p PolkadotEventRecords) GetMultisigCancelled() []types.EventMultisigCancelled {
+	return p.Multisig_MultisigCancelled
+}
+
+func (p PolkadotEventRecords) GetUtilityBatchCompleted() []types.EventUtilityBatchCompleted {
+	return p.Utility_BatchCompleted
 }
 
 func (p PolkadotEventRecords) GetBalancesTransfer() []types.EventBalancesTransfer {

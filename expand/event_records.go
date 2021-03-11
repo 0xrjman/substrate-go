@@ -8,9 +8,14 @@ import (
 )
 
 type IEventRecords interface {
-	GetBalancesTransfer() []types.EventBalancesTransfer
+	GetMultisigNewMultisig() 	[]types.EventMultisigNewMultisig
+	GetMultisigApproval()    	[]types.EventMultisigApproval
+	GetMultisigExecuted() 		[]types.EventMultisigExecuted
+	GetMultisigCancelled() 		[]types.EventMultisigCancelled
+	GetBalancesTransfer() 		[]types.EventBalancesTransfer
+	GetUtilityBatchCompleted() 	[]types.EventUtilityBatchCompleted
 	GetSystemExtrinsicSuccess() []types.EventSystemExtrinsicSuccess
-	GetSystemExtrinsicFailed() []types.EventSystemExtrinsicFailed
+	GetSystemExtrinsicFailed() 	[]types.EventSystemExtrinsicFailed
 }
 
 /*
