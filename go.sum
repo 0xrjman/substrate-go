@@ -182,6 +182,8 @@ github.com/rjmand/go-substrate-rpc-client/v2 v2.3.0 h1:fxBx5lsajpKHdwUfLK2hYVCkB
 github.com/rjmand/go-substrate-rpc-client/v2 v2.3.0/go.mod h1:WFbPfrrU/pDYLUfNBEPFlkeYVQ4+/8au8UKt6WshiyI=
 github.com/rjmand/go-substrate-rpc-client/v2 v2.4.0 h1:Qw0UKycICMtX49Hyzejk4Dtq4v9kO2ZuDKTWsz+tW4Y=
 github.com/rjmand/go-substrate-rpc-client/v2 v2.4.0/go.mod h1:WFbPfrrU/pDYLUfNBEPFlkeYVQ4+/8au8UKt6WshiyI=
+github.com/rjmand/go-substrate-rpc-client/v2 v2.5.0 h1:CR3xgKnPK8pMQ0f8F1pkD3h+8efGpqIqPkqhnpMSTCY=
+github.com/rjmand/go-substrate-rpc-client/v2 v2.5.0/go.mod h1:WFbPfrrU/pDYLUfNBEPFlkeYVQ4+/8au8UKt6WshiyI=
 github.com/rs/cors v0.0.0-20160617231935-a62a804a8a00/go.mod h1:gFx+x8UowdsKA9AchylcLynDq+nNFfI8FkUZdN/jGCU=
 github.com/rs/cors v1.6.0 h1:G9tHG9lebljV9mfp9SNPDL36nCDxmo3zTlAf1YgvzmI=
 github.com/rs/cors v1.6.0/go.mod h1:gFx+x8UowdsKA9AchylcLynDq+nNFfI8FkUZdN/jGCU=

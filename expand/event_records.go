@@ -8,14 +8,14 @@ import (
 )
 
 type IEventRecords interface {
-	GetMultisigNewMultisig() 	[]types.EventMultisigNewMultisig
-	GetMultisigApproval()    	[]types.EventMultisigApproval
-	GetMultisigExecuted() 		[]types.EventMultisigExecuted
-	GetMultisigCancelled() 		[]types.EventMultisigCancelled
-	GetBalancesTransfer() 		[]types.EventBalancesTransfer
-	GetUtilityBatchCompleted() 	[]types.EventUtilityBatchCompleted
+	GetMultisigNewMultisig() []types.EventMultisigNewMultisig
+	GetMultisigApproval() []types.EventMultisigApproval
+	GetMultisigExecuted() []types.EventMultisigExecuted
+	GetMultisigCancelled() []types.EventMultisigCancelled
+	GetBalancesTransfer() []types.EventBalancesTransfer
+	GetUtilityBatchCompleted() []types.EventUtilityBatchCompleted
 	GetSystemExtrinsicSuccess() []types.EventSystemExtrinsicSuccess
-	GetSystemExtrinsicFailed() 	[]types.EventSystemExtrinsicFailed
+	GetSystemExtrinsicFailed() []types.EventSystemExtrinsicFailed
 }
 
 /*
@@ -26,6 +26,20 @@ func DecodeEventRecords(meta *types.Metadata, rawData string, chainName string) 
 	var ier IEventRecords
 	switch strings.ToLower(chainName) {
 	case "polkadot":
+		var events polkadot.PolkadotEventRecords
+		err := e.DecodeEventRecords(meta, &events)
+		if err != nil {
+			return nil, err
+		}
+		ier = &events
+	case "kusama":
+		var events polkadot.PolkadotEventRecords
+		err := e.DecodeEventRecords(meta, &events)
+		if err != nil {
+			return nil, err
+		}
+		ier = &events
+	case "westend":
 		var events polkadot.PolkadotEventRecords
 		err := e.DecodeEventRecords(meta, &events)
 		if err != nil {

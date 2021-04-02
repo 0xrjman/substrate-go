@@ -96,6 +96,9 @@ func (c *Client) checkRuntimeVersion() error {
 		}
 		c.SpecVersion = specVersion
 	}
+
+	fmt.Printf("Chain Name is %v\n", c.Name)
+
 	return nil
 }
 
@@ -275,6 +278,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 						}
 						continue
 					}
+
 					if param.Name == "maybe_timepoint" {
 						height := types.NewOptionU32(0)
 						index := types.NewU32(0)

@@ -185,7 +185,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 	switch modName {
 	case "System":
 		if callName == "remark" {
-			fmt.Printf("get Extrinsic Call: System.remark")
+			fmt.Printf("get Extrinsic Call: System.remark\n")
 			var s string
 			err = decoder.Decode(&s)
 			if err != nil {
@@ -340,10 +340,10 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 				}
 				btkaCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer_keep_alive")
 
-				//检查一下是否为BalanceTransfer
+				/// Check for BalanceTransfer
 				data := tcv.Value.(map[string]interface{})
 				if data["call_index"].(string) == "0300" || data["call_index"].(string) == "0000" {
-					//Polkadot是0503,substrate是0603
+					/// Polkadot is 0503, substrate is 0603
 					data["call_index"] = btCallIdx
 				}
 				callIndex := data["call_index"].(string)
