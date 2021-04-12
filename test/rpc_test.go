@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-const url = "ws://34.92.164.147:9944"
+const url = "ws://127.0.0.1:8087"
 
 func Test_GetBlockByNumber(t *testing.T) {
 	c, err := client.New(url)
@@ -16,9 +16,9 @@ func Test_GetBlockByNumber(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPrefix(ss58.PolkadotPrefix)
+	c.SetPrefix(ss58.ChainXPrefix)
 	//expand.SetSerDeOptions(false)
-	resp, err := c.GetBlockByNumber(22074)
+	resp, err := c.GetBlockByNumber(872)
 	if err != nil {
 		t.Fatal(err)
 	}

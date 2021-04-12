@@ -342,8 +342,8 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 
 				/// Check for BalanceTransfer
 				data := tcv.Value.(map[string]interface{})
-				if data["call_index"].(string) == "0300" || data["call_index"].(string) == "0000" {
-					/// Polkadot is 0503, substrate is 0603
+				if data["call_index"].(string) == "0300" || data["call_index"].(string) == "0000" || data["call_index"].(string) == "03ff" {
+					/// Polkadot is 0503, substrate is 0603, ChainX is 0603
 					data["call_index"] = btCallIdx
 				}
 				callIndex := data["call_index"].(string)
@@ -471,6 +471,52 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 			}
 			ep.Value = result
 			ed.Params = append(ed.Params, ep)
+		}
+	case "XAssets":
+		if callName == "transfer" {
+			var address MultiAddress
+			var addrValue string
+
+			// 0 ---> 	Address
+			err = decoder.Decode(&address)
+			if err != nil {
+				return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v", err)
+			}
+			addrValue = utils.BytesToHex(address.AccountId[:])
+
+			ed.Params = append(ed.Params,
+				ExtrinsicParam{
+					Name:     "dest",
+					Type:     "Address",
+					Value:    addrValue,
+					ValueRaw: addrValue,
+				})
+
+			// 1 ----> Compact<AssetId>
+			var id types.UCompact
+			err = decoder.Decode(&id)
+			if err != nil {
+				return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v", err)
+			}
+			ed.Params = append(ed.Params,
+				ExtrinsicParam{
+					Name:  "id",
+					Type:  "Compact<AssetId>",
+					Value: utils.UCompactToBigInt(id).Int64(),
+				})
+			// 2 ----> Compact<Balance>
+			var b types.UCompact
+			err = decoder.Decode(&b)
+			if err != nil {
+				return fmt.Errorf("decode call: decode Balances.transfer.Compact<Balance> error: %v", err)
+			}
+
+			ed.Params = append(ed.Params,
+				ExtrinsicParam{
+					Name:  "value",
+					Type:  "Compact<Balance>",
+					Value: utils.UCompactToBigInt(b).Int64(),
+				})
 		}
 	default:
 		// unsopport

@@ -2,6 +2,7 @@ package expand
 
 import (
 	"github.com/rjman-self/go-polkadot-rpc-client/expand/bifrost"
+	"github.com/rjman-self/go-polkadot-rpc-client/expand/chainx"
 	"github.com/rjman-self/go-polkadot-rpc-client/expand/polkadot"
 	"github.com/rjmand/go-substrate-rpc-client/v2/types"
 	"strings"
@@ -46,14 +47,28 @@ func DecodeEventRecords(meta *types.Metadata, rawData string, chainName string) 
 			return nil, err
 		}
 		ier = &events
-	default:
+	case "chainx":
+		var events polkadot.PolkadotEventRecords
+		err := e.DecodeEventRecords(meta, &events)
+		if err != nil {
+			return nil, err
+		}
+		ier = &events
+	case "bifrost":
+		//default
 		var events bifrost.BifrostEventRecords
 		err := e.DecodeEventRecords(meta, &events)
 		if err != nil {
 			return nil, err
 		}
 		ier = &events
-
+	default:
+		var events chainx.ChainXEventRecords
+		err := e.DecodeEventRecords(meta, &events)
+		if err != nil {
+			return nil, err
+		}
+		ier = &events
 	}
 
 	return ier, nil

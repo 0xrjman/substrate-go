@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/JFJun/go-substrate-crypto/ss58"
 	"github.com/rjman-self/go-polkadot-rpc-client/expand"
+	"github.com/rjman-self/go-polkadot-rpc-client/expand/chainx"
 	"github.com/rjman-self/go-polkadot-rpc-client/expand/polkadot"
 	"github.com/rjman-self/go-polkadot-rpc-client/models"
 	"github.com/rjman-self/go-polkadot-rpc-client/utils"
@@ -176,6 +177,7 @@ type parseBlockExtrinsicParams struct {
 	nonce                         int64
 	extrinsicIdx, length          int
 	recipient                     string
+	tokenId                       chainx.AssetId
 	multiSigAsMulti               expand.MultiSigAsMulti
 }
 
@@ -419,6 +421,29 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 						default:
 							continue
 						}
+					}
+				}
+				params = append(params, blockData)
+			}
+		case "XAssets":
+			if resp.CallModuleFunction == "transfer" {
+				blockData := parseBlockExtrinsicParams{}
+				blockData.what = "transfer"
+				blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.Prefix)
+				blockData.era = resp.Era
+				blockData.sig = resp.Signature
+				blockData.nonce = resp.Nonce
+				blockData.extrinsicIdx = i
+				blockData.fee, err = c.GetPartialFee(extrinsic, blockResp.ParentHash)
+
+				blockData.txid = c.createTxHash(extrinsic)
+				blockData.length = resp.Length
+				for _, param := range resp.Params {
+					if param.Name == "dest" {
+						blockData.to, _ = ss58.EncodeByPubHex(param.Value.(string), c.Prefix)
+					}
+					if param.Name == "id" {
+						blockData.tokenId = chainx.AssetId(param.Value.(float64))
 					}
 				}
 				params = append(params, blockData)

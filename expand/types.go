@@ -8,9 +8,9 @@ import (
 	"github.com/huandu/xstrings"
 	"github.com/rjman-self/go-polkadot-rpc-client/uint128"
 	"github.com/rjman-self/go-polkadot-rpc-client/utils"
-	"github.com/shopspring/decimal"
 	"github.com/rjmand/go-substrate-rpc-client/v2/scale"
 	"github.com/rjmand/go-substrate-rpc-client/v2/types"
+	"github.com/shopspring/decimal"
 	"io"
 	"reflect"
 )
@@ -425,6 +425,9 @@ func (d *GenericMultiAddress) Decode(decoder scale.Decoder) error {
 		err = decoder.Decode(&d.Address32)
 	case 3:
 		err = decoder.Decode(&d.Address20)
+	case 255:
+		//ChainX
+		err = decoder.Decode(&d.AccountId)
 	default:
 		err = fmt.Errorf("generic MultiAddress unsupport type=%d ", b)
 	}
