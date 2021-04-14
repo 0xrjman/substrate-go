@@ -260,14 +260,14 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 					Value: threshold,
 				})
 
-			//2. decode otherSigner
+			//2. decode otherSignatories
 			var otherSignatories []string
 			var address []types.AccountID
 			//var bt byte
 			//err = decoder.Decode(&bt)
 			err = decoder.Decode(&address)
 			if err != nil {
-				return fmt.Errorf("decode call: decode Multi.as_multi.OtherSigner error: %v", err)
+				return fmt.Errorf("decode call: decode Multi.as_multi.OtherSignatories error: %v", err)
 			}
 			for _, add := range address {
 				otherSignatories = append(otherSignatories, utils.BytesToHex(add[:]))

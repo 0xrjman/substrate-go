@@ -26,20 +26,10 @@ func Test_GetBlockByNumber(t *testing.T) {
 
 	hash, err := c.Api.RPC.Chain.GetBlockHash(2007516)
 	block, err := c.Api.RPC.Chain.GetBlock(hash)
-
 	if err != nil {
 		fmt.Printf("GetBlockHash err\n")
-		//api, err := gsrpc2.NewSubstrateAPI(url)
-		//if err != nil {
-		//	fmt.Printf("new api err is %v\n", err)
-		//}
-		//blocks, err := api.RPC.Chain.GetBlock(types.Hash(hash))
-		//block = *types.SignedBlock(blocks)
-		//if err != nil {
-		//	fmt.Printf("new api err is %v\n", err)
-		//}
-
 	}
+
 	if block != nil {
 		currentBlock := int64(block.Block.Header.Number)
 		fmt.Printf("block is %v\n", currentBlock)

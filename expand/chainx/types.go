@@ -1,7 +1,6 @@
 package chainx
 
 import (
-	"github.com/rjman-self/go-polkadot-rpc-client/expand/base"
 	"github.com/rjmand/go-substrate-rpc-client/v2/types"
 )
 
@@ -13,19 +12,9 @@ var AsMultiCancelled = "as_multi_cancelled"
 var UtilityBatch = "multi_sign_batch"
 
 type ChainXEventRecords struct {
-	XGatewayBitcoin
 	types.EventRecords
-	Claims_Claimed                    []EventClaimsClaimed
-	ElectionsPhragmen_VoterReported   []EventElectionsPhragmenVoterReported
-	ElectionsPhragmen_MemberRenounced []EventElectionsPhragmenMemberRenounced
-	ElectionsPhragmen_MemberKicked    []EventElectionsPhragmenMemberKicked
-	ElectionsPhragmen_ElectionError   []EventElectionsPhragmenElectionError
-	ElectionsPhragmen_EmptyTerm       []EventElectionsPhragmenEmptyTerm
-	//ElectionsPhragmen_NewTerm		[]EventElectionsPhragmenNewTerm		暂不支持解析
-	Democracy_Blacklisted []EventDemocracyBlacklisted
-
-	XTransactionFee_FeePaid []EventXTransactionFeeFeePaid
-	//XAssets_Moved                     []EventXAssetsMoved
+	Election
+	XBtcV1
 }
 
 func (p ChainXEventRecords) GetMultisigNewMultisig() []types.EventMultisigNewMultisig {
@@ -58,59 +47,4 @@ func (p ChainXEventRecords) GetSystemExtrinsicSuccess() []types.EventSystemExtri
 
 func (p ChainXEventRecords) GetSystemExtrinsicFailed() []types.EventSystemExtrinsicFailed {
 	return p.System_ExtrinsicFailed
-}
-
-type EventDemocracyBlacklisted struct {
-	Phase  types.Phase
-	Hash   types.Hash
-	Topics []types.Hash
-}
-
-//type EventElectionsPhragmenNewTerm struct {
-//	Phase    types.Phase
-//	Vec
-//	Topics []types.Hash
-//}
-type EventElectionsPhragmenEmptyTerm struct {
-	Phase types.Phase
-
-	Topics []types.Hash
-}
-type EventElectionsPhragmenElectionError struct {
-	Phase  types.Phase
-	Topics []types.Hash
-}
-type EventElectionsPhragmenMemberKicked struct {
-	Phase     types.Phase
-	AccountId types.AccountID
-	Topics    []types.Hash
-}
-type EventElectionsPhragmenMemberRenounced struct {
-	Phase     types.Phase
-	AccountId types.AccountID
-	Topics    []types.Hash
-}
-type EventElectionsPhragmenVoterReported struct {
-	Phase  types.Phase
-	Who1   types.AccountID
-	Who2   types.AccountID
-	Bool   types.Bool
-	Topics []types.Hash
-}
-type EventClaimsClaimed struct {
-	Phase           types.Phase
-	AccountId       types.AccountID
-	EthereumAddress base.VecU8L20
-	Balance         types.U128
-	Topics          []types.Hash
-}
-
-// EventXTransactionFeeFeePaid is emitted when some XTransactionFee was Paid
-type EventXTransactionFeeFeePaid struct {
-	Phase        types.Phase
-	Author       types.AccountID
-	AuthorFee    types.U128
-	RewardPot    types.AccountID
-	RewardPotFee types.U128
-	Topics       []types.Hash
 }
