@@ -13,6 +13,7 @@ var AsMultiCancelled = "as_multi_cancelled"
 var UtilityBatch = "multi_sign_batch"
 
 type ChainXEventRecords struct {
+	XGatewayBitcoin
 	types.EventRecords
 	Claims_Claimed                    []EventClaimsClaimed
 	ElectionsPhragmen_VoterReported   []EventElectionsPhragmenVoterReported
@@ -24,7 +25,7 @@ type ChainXEventRecords struct {
 	Democracy_Blacklisted []EventDemocracyBlacklisted
 
 	XTransactionFee_FeePaid []EventXTransactionFeeFeePaid
-	XAssets_Moved           []EventXAssetsMoved
+	//XAssets_Moved                     []EventXAssetsMoved
 }
 
 func (p ChainXEventRecords) GetMultisigNewMultisig() []types.EventMultisigNewMultisig {
@@ -112,16 +113,4 @@ type EventXTransactionFeeFeePaid struct {
 	RewardPot    types.AccountID
 	RewardPotFee types.U128
 	Topics       []types.Hash
-}
-
-// EventBalancesTransfer is emitted when a transfer succeeded (from, to, value)
-type EventXAssetsMoved struct {
-	Phase    types.Phase
-	AssetId  AssetId
-	From     types.AccountID
-	FromType uint32
-	To       types.AccountID
-	ToType   uint32
-	Balance  types.U128
-	Topics   []types.Hash
 }

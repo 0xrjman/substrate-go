@@ -48,7 +48,7 @@ func DecodeEventRecords(meta *types.Metadata, rawData string, chainName string) 
 		}
 		ier = &events
 	case "chainx":
-		var events polkadot.PolkadotEventRecords
+		var events chainx.ChainXEventRecords
 		err := e.DecodeEventRecords(meta, &events)
 		if err != nil {
 			return nil, err
