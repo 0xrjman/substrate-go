@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/rjman-self/go-polkadot-rpc-client/expand"
+	"github.com/rjman-self/go-polkadot-rpc-client/expand/chainx/xevents"
 )
 
 type Bytes []byte
@@ -47,6 +48,7 @@ type ExtrinsicResponse struct {
 	ExtrinsicLength int                    `json:"extrinsic_length"`
 	Recipient       string                 `json:"recipient"`
 	MultiSigAsMulti expand.MultiSigAsMulti `json:"multisig"`
+	AssetId         xevents.AssetId        `json:"asset_id"`
 }
 
 type EventResult struct {

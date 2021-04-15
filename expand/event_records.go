@@ -17,11 +17,9 @@ type IEventRecords interface {
 	GetUtilityBatchCompleted() []types.EventUtilityBatchCompleted
 	GetSystemExtrinsicSuccess() []types.EventSystemExtrinsicSuccess
 	GetSystemExtrinsicFailed() []types.EventSystemExtrinsicFailed
+	///ChainX
 }
 
-/*
-扩展： 解析event
-*/
 func DecodeEventRecords(meta *types.Metadata, rawData string, chainName string) (IEventRecords, error) {
 	e := types.EventRecordsRaw(types.MustHexDecodeString(rawData))
 	var ier IEventRecords

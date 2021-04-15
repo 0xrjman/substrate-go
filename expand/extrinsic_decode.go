@@ -48,7 +48,7 @@ func NewExtrinsicDecoder(meta *types.Metadata) (*ExtrinsicDecoder, error) {
 	return ed, nil
 }
 
-func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder) error {
+func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder, chainName string) error {
 	var length types.UCompact
 	err := decoder.Decode(&length)
 	if err != nil {
@@ -136,10 +136,10 @@ func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder) error
 		return fmt.Errorf("extrinsics version %s is not support", ed.VersionInfo)
 	}
 	if ed.CallIndex != "" {
-		_ = ed.decodeCallIndex(decoder)
-		//if err != nil {
-		//	return err
-		//}
+		err = ed.decodeCallIndex(decoder, chainName)
+		if err != nil {
+			fmt.Errorf("decodeCallIndex err: %v\n", err)
+		}
 	}
 	result := map[string]interface{}{
 		"extrinsic_length": ed.ExtrinsicLength,
@@ -165,7 +165,7 @@ func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder) error
 	return nil
 }
 
-func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
+func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName string) error {
 	var err error
 	//避免指针为空
 	defer func() {
@@ -249,194 +249,258 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 				})
 		}
 	case "Multisig":
-		if callName == "as_multi" {
-			//1. decode threshold
-			var threshold uint16
-			err = decoder.Decode(&threshold)
-			ed.Params = append(ed.Params,
-				ExtrinsicParam{
-					Name:  "threshold",
-					Type:  "uint16",
-					Value: threshold,
-				})
+		if ed.checkChainX(chainName) {
+			if callName == "as_multi" {
+				//1. decode threshold
+				var threshold uint16
+				err = decoder.Decode(&threshold)
+				ed.Params = append(ed.Params,
+					ExtrinsicParam{
+						Name:  "threshold",
+						Type:  "uint16",
+						Value: threshold,
+					})
 
-			//2. decode otherSignatories
-			var otherSignatories []string
-			var address []types.AccountID
-			//var bt byte
-			//err = decoder.Decode(&bt)
-			err = decoder.Decode(&address)
-			if err != nil {
-				return fmt.Errorf("decode call: decode Multi.as_multi.OtherSignatories error: %v", err)
-			}
-			for _, add := range address {
-				otherSignatories = append(otherSignatories, utils.BytesToHex(add[:]))
-			}
-
-			ed.Params = append(ed.Params,
-				ExtrinsicParam{
-					Name:  "other_signatories",
-					Type:  "vec<AccountId>",
-					Value: otherSignatories,
-				})
-
-			//3. docode TimePoint
-			var tp []uint32
-			var option []byte
-
-			//tp := TimePointSafe32{}
-			//err = decoder.Decode(&option)
-			//fmt.Printf("err is %v\n", err)
-
-			var hasValue bool
-			_ = decoder.DecodeOption(&hasValue, option)
-			//fmt.Printf("timePoint is %v\n", err)
-
-			if hasValue {
-				var height uint32
-				var index uint32
-
-				err = decoder.Decode(&height)
-				err = decoder.Decode(&index)
-
-				//blockNumber := types.NewOptionU32(height)
-
-				//if !option {
-				//	fmt.Errorf("TimePoint.Height is Not Safe!")
-				//}
-
-				tp = append(tp, height)
-				tp = append(tp, index)
-			} else {
-				tp = nil
-			}
-
-			ed.Params = append(ed.Params,
-				ExtrinsicParam{
-					Name:  "maybe_timepoint",
-					Type:  "TimePointSafe32",
-					Value: tp,
-				})
-
-			//4. decode call => transfer
-			vec := new(Vec)
-			var tc TransferOpaqueCall
-			//err = vec.ProcessFirstVec(decoder, tc)
-			err = vec.ProcessOpaqueCallVec(decoder, tc)
-			if err != nil {
-				return fmt.Errorf("decode call: decode Utility.batch => Balances.transfer error: %v", err)
-			}
-
-			ep := ExtrinsicParam{}
-			ep.Name = "calls"
-			ep.Type = "Vec<Call>"
-			var result []interface{}
-
-			for _, value := range vec.Value {
-				tcv := value.(*TransferOpaqueCall)
-				btCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer")
+				//2. decode otherSignatories
+				var otherSignatories []string
+				var address []types.AccountID
+				//var bt byte
+				//err = decoder.Decode(&bt)
+				err = decoder.Decode(&address)
 				if err != nil {
-					return fmt.Errorf("decode Multisig.as_multi: get  Multisig.as_multi call index error: %v", err)
+					return fmt.Errorf("decode call: decode Multi.as_multi.OtherSignatories error: %v", err)
 				}
-				btkaCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer_keep_alive")
-
-				/// Check for BalanceTransfer
-				data := tcv.Value.(map[string]interface{})
-				if data["call_index"].(string) == "0300" || data["call_index"].(string) == "0000" || data["call_index"].(string) == "03ff" {
-					/// Polkadot is 0503, substrate is 0603, ChainX is 0603
-					data["call_index"] = btCallIdx
+				for _, add := range address {
+					otherSignatories = append(otherSignatories, utils.BytesToHex(add[:]))
 				}
-				callIndex := data["call_index"].(string)
 
+				ed.Params = append(ed.Params,
+					ExtrinsicParam{
+						Name:  "other_signatories",
+						Type:  "vec<AccountId>",
+						Value: otherSignatories,
+					})
+
+				//3. docode TimePoint
+				var tp []uint32
+				var option []byte
+
+				//tp := TimePointSafe32{}
+				//err = decoder.Decode(&option)
+				//fmt.Printf("err is %v\n", err)
+
+				var hasValue bool
+				_ = decoder.DecodeOption(&hasValue, option)
+				//fmt.Printf("timePoint is %v\n", err)
+
+				if hasValue {
+					var height uint32
+					var index uint32
+
+					err = decoder.Decode(&height)
+					err = decoder.Decode(&index)
+
+					//blockNumber := types.NewOptionU32(height)
+
+					//if !option {
+					//	fmt.Errorf("TimePoint.Height is Not Safe!")
+					//}
+
+					tp = append(tp, height)
+					tp = append(tp, index)
+				} else {
+					tp = nil
+				}
+
+				ed.Params = append(ed.Params,
+					ExtrinsicParam{
+						Name:  "maybe_timepoint",
+						Type:  "TimePointSafe32",
+						Value: tp,
+					})
+
+				//4. decode call => transfer
+				vec := new(Vec)
+				var tc xTransferOpaqueCall
+				//err = vec.ProcessFirstVec(decoder, tc)
+				err = vec.ProcessOpaqueCallVec(decoder, tc)
 				if err != nil {
-					return fmt.Errorf("decode Multisig.as_multi: get  Balances.transfer_keep_alive call index error: %v", err)
+					return fmt.Errorf("decode call: decode MultiSig.AsMulti => Assets.transfer error: %v", err)
 				}
-				if callIndex == btCallIdx || callIndex == btkaCallIdx {
-					mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
+
+				ep := ExtrinsicParam{}
+				ep.Name = "calls"
+				ep.Type = "Vec<Call>"
+				var result []interface{}
+
+				for _, value := range vec.Value {
+					tcv := value.(*xTransferOpaqueCall)
+					btCallIdx, err := ed.me.MV.GetCallIndex("XAssets", "transfer")
 					if err != nil {
-						return fmt.Errorf("decode Multisig.as_multi: get call index error: %v", err)
+						return fmt.Errorf("decode ChainX => Multisig.as_multi: get  Multisig.as_multi call index error: %v", err)
 					}
-					if mn != "Balances" {
-						return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)
-					}
-					data["call_function"] = cn
-					data["call_module"] = mn
-					result = append(result, data)
-				}
-				ep.Value = result
-				ed.Params = append(ed.Params, ep)
-			}
-			//5. decode store_call
-			var storeCall bool
-			err = decoder.Decode(&storeCall)
-			if err != nil {
-				fmt.Printf("decode call: decode Multi.as_multi.store_call error: %v", err)
-			}
 
-			ed.Params = append(ed.Params,
-				ExtrinsicParam{
-					Name:  "store_call",
-					Type:  "bool",
-					Value: storeCall,
-				})
-
-			//6. decode Weight
-			var maxWeight uint64
-			err = decoder.Decode(&maxWeight)
-			if err != nil {
-				fmt.Printf("decode call: decode Multi.as_multi.max_weight error: %v", err)
-			}
-
-			ed.Params = append(ed.Params,
-				ExtrinsicParam{
-					Name:  "max_weight",
-					Type:  "uint64",
-					Value: maxWeight,
-				})
-		}
-	case "Utility":
-		if callName == "batch" {
-			vec := new(Vec)
-			//BEGIN: Custom decode
-			// 1: Balances.Transfer
-			// 0--> calls   Vec<Call>
-			var tc TransferCall
-			err = vec.ProcessFirstVec(decoder, tc)
-			if err != nil {
-				return fmt.Errorf("decode call: decode Utility.batch => Balances.transfer error: %v", err)
-			}
-
-			// 2: System.remark
-			var rc RemarkCall
-			err := vec.ProcessSecondVec(decoder, rc)
-			if err != nil {
-				fmt.Printf("decode call: decode Utility.batch => System.remark error: %v\n", err)
-			}
-
-			//utils.CheckStructData(vec.Value)
-			ep := ExtrinsicParam{}
-			ep.Name = "calls"
-			ep.Type = "Vec<Call>"
-			var result []interface{}
-
-			for i, value := range vec.Value {
-				if i == 0 {
-					tcv := value.(*TransferCall)
-					//检查一下是否为BalanceTransfer
+					/// Check for XAssetsTransfer
 					data := tcv.Value.(map[string]interface{})
+					if data["call_index"].(string) == "0300" || data["call_index"].(string) == "0000" || data["call_index"].(string) == "03ff" || data["call_index"].(string) == "00ff" {
+						/// Polkadot is 0503, substrate is 0603, ChainX is 0603
+						data["call_index"] = btCallIdx
+					}
 					callIndex := data["call_index"].(string)
+
+					if err != nil {
+						return fmt.Errorf("decode Multisig.as_multi: get  Balances.transfer_keep_alive call index error: %v", err)
+					}
+					if callIndex == btCallIdx {
+						mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
+						if err != nil {
+							return fmt.Errorf("decode Multisig.as_multi: get call index error: %v", err)
+						}
+						if mn != "XAssets" {
+							return fmt.Errorf("decode Utility.batch:  call module name is not 'XAssets' ,NAME=%s", mn)
+						}
+						data["call_function"] = cn
+						data["call_module"] = mn
+						result = append(result, data)
+					}
+					ep.Value = result
+					ed.Params = append(ed.Params, ep)
+				}
+				//5. decode store_call
+				var storeCall bool
+				err = decoder.Decode(&storeCall)
+				if err != nil {
+					fmt.Printf("decode call: decode Multi.as_multi.store_call error: %v", err)
+				}
+
+				ed.Params = append(ed.Params,
+					ExtrinsicParam{
+						Name:  "store_call",
+						Type:  "bool",
+						Value: storeCall,
+					})
+
+				//6. decode Weight
+				var maxWeight uint64
+				err = decoder.Decode(&maxWeight)
+				if err != nil {
+					fmt.Printf("decode call: decode Multi.as_multi.max_weight error: %v", err)
+				}
+
+				ed.Params = append(ed.Params,
+					ExtrinsicParam{
+						Name:  "max_weight",
+						Type:  "uint64",
+						Value: maxWeight,
+					})
+			}
+		} else {
+			if callName == "as_multi" {
+				//1. decode threshold
+				var threshold uint16
+				err = decoder.Decode(&threshold)
+				ed.Params = append(ed.Params,
+					ExtrinsicParam{
+						Name:  "threshold",
+						Type:  "uint16",
+						Value: threshold,
+					})
+
+				//2. decode otherSignatories
+				var otherSignatories []string
+				var address []types.AccountID
+				//var bt byte
+				//err = decoder.Decode(&bt)
+				err = decoder.Decode(&address)
+				if err != nil {
+					return fmt.Errorf("decode call: decode Multi.as_multi.OtherSignatories error: %v", err)
+				}
+				for _, add := range address {
+					otherSignatories = append(otherSignatories, utils.BytesToHex(add[:]))
+				}
+
+				ed.Params = append(ed.Params,
+					ExtrinsicParam{
+						Name:  "other_signatories",
+						Type:  "vec<AccountId>",
+						Value: otherSignatories,
+					})
+
+				//3. docode TimePoint
+				var tp []uint32
+				var option []byte
+
+				//tp := TimePointSafe32{}
+				//err = decoder.Decode(&option)
+				//fmt.Printf("err is %v\n", err)
+
+				var hasValue bool
+				_ = decoder.DecodeOption(&hasValue, option)
+				//fmt.Printf("timePoint is %v\n", err)
+
+				if hasValue {
+					var height uint32
+					var index uint32
+
+					err = decoder.Decode(&height)
+					err = decoder.Decode(&index)
+
+					//blockNumber := types.NewOptionU32(height)
+
+					//if !option {
+					//	fmt.Errorf("TimePoint.Height is Not Safe!")
+					//}
+
+					tp = append(tp, height)
+					tp = append(tp, index)
+				} else {
+					tp = nil
+				}
+
+				ed.Params = append(ed.Params,
+					ExtrinsicParam{
+						Name:  "maybe_timepoint",
+						Type:  "TimePointSafe32",
+						Value: tp,
+					})
+
+				//4. decode call => transfer
+				vec := new(Vec)
+				var tc TransferOpaqueCall
+				//err = vec.ProcessFirstVec(decoder, tc)
+				err = vec.ProcessOpaqueCallVec(decoder, tc)
+				if err != nil {
+					return fmt.Errorf("decode call: decode Utility.batch => Balances.transfer error: %v", err)
+				}
+
+				ep := ExtrinsicParam{}
+				ep.Name = "calls"
+				ep.Type = "Vec<Call>"
+				var result []interface{}
+
+				for _, value := range vec.Value {
+					tcv := value.(*TransferOpaqueCall)
 					btCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer")
 					if err != nil {
-						return fmt.Errorf("decode Utility.batch: get  Balances.transfer call index error: %v", err)
+						return fmt.Errorf("decode Multisig.as_multi: get  Multisig.as_multi call index error: %v", err)
 					}
 					btkaCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer_keep_alive")
+
+					/// Check for BalanceTransfer
+					data := tcv.Value.(map[string]interface{})
+					if data["call_index"].(string) == "0300" || data["call_index"].(string) == "0000" || data["call_index"].(string) == "03ff" {
+						/// Polkadot is 0503, substrate is 0603, ChainX is 0603
+						data["call_index"] = btCallIdx
+					}
+					callIndex := data["call_index"].(string)
+
 					if err != nil {
-						return fmt.Errorf("decode Utility.batch: get  Balances.transfer_keep_alive call index error: %v", err)
+						return fmt.Errorf("decode Multisig.as_multi: get  Balances.transfer_keep_alive call index error: %v", err)
 					}
 					if callIndex == btCallIdx || callIndex == btkaCallIdx {
 						mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
 						if err != nil {
-							return fmt.Errorf("decode Utility.batch: get call index error: %v", err)
+							return fmt.Errorf("decode Multisig.as_multi: get call index error: %v", err)
 						}
 						if mn != "Balances" {
 							return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)
@@ -445,33 +509,194 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 						data["call_module"] = mn
 						result = append(result, data)
 					}
+					ep.Value = result
+					ed.Params = append(ed.Params, ep)
 				}
-				if i == 1 {
-					tcv := value.(*RemarkCall)
-					//检查一下是否为System.remark
-					data := tcv.Value.(map[string]interface{})
-					callIndex := data["call_index"].(string)
-					srCallIdx, err := ed.me.MV.GetCallIndex("System", "remark")
-					if err != nil {
-						return fmt.Errorf("decode Utility.batch: get  Balances.transfer call index error: %v", err)
-					}
-					if callIndex == srCallIdx {
-						mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
-						if err != nil {
-							return fmt.Errorf("decode Utility.batch: get call index error: %v", err)
-						}
-						if mn != "System" {
-							return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)
-						}
-						data["call_function"] = cn
-						data["call_module"] = mn
-						result = append(result, data)
-					}
+				//5. decode store_call
+				var storeCall bool
+				err = decoder.Decode(&storeCall)
+				if err != nil {
+					fmt.Printf("decode call: decode Multi.as_multi.store_call error: %v", err)
 				}
+
+				ed.Params = append(ed.Params,
+					ExtrinsicParam{
+						Name:  "store_call",
+						Type:  "bool",
+						Value: storeCall,
+					})
+
+				//6. decode Weight
+				var maxWeight uint64
+				err = decoder.Decode(&maxWeight)
+				if err != nil {
+					fmt.Printf("decode call: decode Multi.as_multi.max_weight error: %v", err)
+				}
+
+				ed.Params = append(ed.Params,
+					ExtrinsicParam{
+						Name:  "max_weight",
+						Type:  "uint64",
+						Value: maxWeight,
+					})
 			}
-			ep.Value = result
-			ed.Params = append(ed.Params, ep)
 		}
+	case "Utility":
+		/// Check whether ChainX
+		if ed.checkChainX(chainName) {
+			/// Chain is ChainX
+			if callName == "batch" {
+				vec := new(Vec)
+
+				// 1: XAssets.Transfer
+				var tc xTransferCall
+				err = vec.ProcessFirstVec(decoder, tc)
+				if err != nil {
+					return fmt.Errorf("decode call: decode Utility.batch => XAssets.transfer error: %v", err)
+				}
+
+				// 2: System.remark
+				var rc RemarkCall
+				err := vec.ProcessSecondVec(decoder, rc)
+				if err != nil {
+					fmt.Printf("decode call: decode Utility.batch => System.remark error: %v\n", err)
+				}
+
+				//utils.CheckStructData(vec.Value)
+				ep := ExtrinsicParam{}
+				ep.Name = "calls"
+				ep.Type = "Vec<Call>"
+				var result []interface{}
+
+				for i, value := range vec.Value {
+					if i == 0 {
+						tcv := value.(*xTransferCall)
+						//检查一下是否为xAssetsTransfer
+						data := tcv.Value.(map[string]interface{})
+						callIndex := data["call_index"].(string)
+						btCallIdx, err := ed.me.MV.GetCallIndex("XAssets", "transfer")
+						if err != nil {
+							return fmt.Errorf("decode Utility.batch: get  XAssets.transfer call index error: %v", err)
+						}
+						if callIndex == btCallIdx {
+							mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
+							if err != nil {
+								return fmt.Errorf("decode Utility.batch: get call index error: %v", err)
+							}
+							if mn != "XAssets" {
+								return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)
+							}
+							data["call_function"] = cn
+							data["call_module"] = mn
+							result = append(result, data)
+						}
+					}
+					if i == 1 {
+						tcv := value.(*RemarkCall)
+						//检查一下是否为System.remark
+						data := tcv.Value.(map[string]interface{})
+						callIndex := data["call_index"].(string)
+						srCallIdx, err := ed.me.MV.GetCallIndex("System", "remark")
+						if err != nil {
+							return fmt.Errorf("decode Utility.batch: get  Balances.transfer call index error: %v", err)
+						}
+						if callIndex == srCallIdx {
+							mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
+							if err != nil {
+								return fmt.Errorf("decode Utility.batch: get call index error: %v", err)
+							}
+							if mn != "System" {
+								return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)
+							}
+							data["call_function"] = cn
+							data["call_module"] = mn
+							result = append(result, data)
+						}
+					}
+				}
+				ep.Value = result
+				ed.Params = append(ed.Params, ep)
+			}
+		} else {
+			if callName == "batch" {
+				vec := new(Vec)
+				//BEGIN: Custom decode
+				// 1: Balances.Transfer
+				// 0--> calls   Vec<Call>
+				var tc TransferCall
+				err = vec.ProcessFirstVec(decoder, tc)
+				if err != nil {
+					return fmt.Errorf("decode call: decode Utility.batch => Balances.transfer error: %v", err)
+				}
+
+				// 2: System.remark
+				var rc RemarkCall
+				err := vec.ProcessSecondVec(decoder, rc)
+				if err != nil {
+					fmt.Printf("decode call: decode Utility.batch => System.remark error: %v\n", err)
+				}
+
+				//utils.CheckStructData(vec.Value)
+				ep := ExtrinsicParam{}
+				ep.Name = "calls"
+				ep.Type = "Vec<Call>"
+				var result []interface{}
+
+				for i, value := range vec.Value {
+					if i == 0 {
+						tcv := value.(*TransferCall)
+						//检查一下是否为BalanceTransfer
+						data := tcv.Value.(map[string]interface{})
+						callIndex := data["call_index"].(string)
+						btCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer")
+						if err != nil {
+							return fmt.Errorf("decode Utility.batch: get  Balances.transfer call index error: %v", err)
+						}
+						btkaCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer_keep_alive")
+						if err != nil {
+							return fmt.Errorf("decode Utility.batch: get  Balances.transfer_keep_alive call index error: %v", err)
+						}
+						if callIndex == btCallIdx || callIndex == btkaCallIdx {
+							mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
+							if err != nil {
+								return fmt.Errorf("decode Utility.batch: get call index error: %v", err)
+							}
+							if mn != "Balances" {
+								return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)
+							}
+							data["call_function"] = cn
+							data["call_module"] = mn
+							result = append(result, data)
+						}
+					}
+					if i == 1 {
+						tcv := value.(*RemarkCall)
+						//检查一下是否为System.remark
+						data := tcv.Value.(map[string]interface{})
+						callIndex := data["call_index"].(string)
+						srCallIdx, err := ed.me.MV.GetCallIndex("System", "remark")
+						if err != nil {
+							return fmt.Errorf("decode Utility.batch: get  Balances.transfer call index error: %v", err)
+						}
+						if callIndex == srCallIdx {
+							mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
+							if err != nil {
+								return fmt.Errorf("decode Utility.batch: get call index error: %v", err)
+							}
+							if mn != "System" {
+								return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)
+							}
+							data["call_function"] = cn
+							data["call_module"] = mn
+							result = append(result, data)
+						}
+					}
+				}
+				ep.Value = result
+				ed.Params = append(ed.Params, ep)
+			}
+		}
+
 	case "XAssets":
 		if callName == "transfer" {
 			var address MultiAddress
@@ -502,8 +727,9 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 				ExtrinsicParam{
 					Name:  "id",
 					Type:  "Compact<AssetId>",
-					Value: utils.UCompactToBigInt(id).Int64(),
+					Value: types.U32(utils.UCompactToBigInt(id).Int64()),
 				})
+
 			// 2 ----> Compact<Balance>
 			var b types.UCompact
 			err = decoder.Decode(&b)
@@ -524,4 +750,17 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder) error {
 
 	}
 	return nil
+}
+
+func (ed *ExtrinsicDecoder) checkChainX(chainName string) bool {
+	var isChainX = false
+	_, err := ed.me.MV.GetCallIndex("XAssets", "transfer")
+	if err == nil {
+		isChainX = true
+	}
+	if isChainX || chainName == "dev" || chainName == "chainx" {
+		return true
+	} else {
+		return false
+	}
 }

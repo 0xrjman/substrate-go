@@ -4,13 +4,6 @@ import (
 	"github.com/rjmand/go-substrate-rpc-client/v2/types"
 )
 
-/// Polkadot MultiSignExtrinsic Type
-var AsMultiNew = "as_multi_new"
-var AsMultiApprove = "as_multi_approve"
-var AsMultiExecuted = "as_multi_executed"
-var AsMultiCancelled = "as_multi_cancelled"
-var UtilityBatch = "multi_sign_batch"
-
 type ChainXEventRecords struct {
 	types.EventRecords
 	Election

@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"github.com/JFJun/go-substrate-crypto/ss58"
 	"github.com/rjman-self/go-polkadot-rpc-client/expand"
-	"github.com/rjman-self/go-polkadot-rpc-client/expand/chainx"
-	"github.com/rjman-self/go-polkadot-rpc-client/expand/polkadot"
+	"github.com/rjman-self/go-polkadot-rpc-client/expand/base"
+	"github.com/rjman-self/go-polkadot-rpc-client/expand/chainx/xevents"
 	"github.com/rjman-self/go-polkadot-rpc-client/models"
 	"github.com/rjman-self/go-polkadot-rpc-client/utils"
 	gsrc "github.com/rjmand/go-substrate-rpc-client/v2"
@@ -174,10 +174,11 @@ func (c *Client) GetBlockByHash(blockHash string) (*models.BlockResponse, error)
 type parseBlockExtrinsicParams struct {
 	what                          string
 	from, to, sig, era, txid, fee string
+	amount                        string
 	nonce                         int64
 	extrinsicIdx, length          int
 	recipient                     string
-	tokenId                       chainx.AssetId
+	tokenId                       xevents.AssetId
 	multiSigAsMulti               expand.MultiSigAsMulti
 }
 
@@ -209,7 +210,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 		if err != nil {
 			return fmt.Errorf("new extrinsic decode error: %v", err)
 		}
-		err = ed.ProcessExtrinsicDecoder(*decoder)
+		err = ed.ProcessExtrinsicDecoder(*decoder, c.Name)
 		if err != nil {
 			return fmt.Errorf("decode extrinsic error: %v", err)
 		}
@@ -257,173 +258,328 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 				params = append(params, blockData)
 			}
 		case "Multisig":
-			if resp.CallModuleFunction == "as_multi" {
-				blockData := parseBlockExtrinsicParams{}
-				blockData.what = "as_multi_raw"
-				blockData.era = resp.Era
-				blockData.sig = resp.Signature
-				blockData.nonce = resp.Nonce
-				blockData.extrinsicIdx = i
-				blockData.fee, err = c.GetPartialFee(extrinsic, blockResp.ParentHash)
-				blockData.txid = c.createTxHash(extrinsic)
-				blockData.length = resp.Length
-				for _, param := range resp.Params {
-					if param.Name == "threshold" {
-						blockData.multiSigAsMulti.Threshold = uint16(param.Value.(float64))
-						continue
-					}
-					if param.Name == "other_signatories" {
-						for _, value := range param.Value.([]interface{}) {
-							blockData.multiSigAsMulti.OtherSignatories = append(blockData.multiSigAsMulti.OtherSignatories, value.(string))
-						}
-						continue
-					}
-
-					if param.Name == "maybe_timepoint" {
-						height := types.NewOptionU32(0)
-						index := types.NewU32(0)
-						if param.Value == nil {
+			if string(c.Prefix) == string(ss58.ChainXPrefix) || c.Name == "chainx" {
+				if resp.CallModuleFunction == "as_multi" {
+					blockData := parseBlockExtrinsicParams{}
+					blockData.what = "as_multi_raw"
+					blockData.era = resp.Era
+					blockData.sig = resp.Signature
+					blockData.nonce = resp.Nonce
+					blockData.extrinsicIdx = i
+					blockData.fee, err = c.GetPartialFee(extrinsic, blockResp.ParentHash)
+					blockData.txid = c.createTxHash(extrinsic)
+					blockData.length = resp.Length
+					for _, param := range resp.Params {
+						if param.Name == "threshold" {
+							blockData.multiSigAsMulti.Threshold = uint16(param.Value.(float64))
 							continue
 						}
-						for i, value := range param.Value.([]interface{}) {
-							if i == 0 {
-								height.SetSome(types.U32(value.(float64)))
+						if param.Name == "other_signatories" {
+							for _, value := range param.Value.([]interface{}) {
+								blockData.multiSigAsMulti.OtherSignatories = append(blockData.multiSigAsMulti.OtherSignatories, value.(string))
 							}
-							if i == 1 {
-								index = types.U32(value.(float64))
-							}
+							continue
 						}
-						var maybeTimePoint = expand.TimePointSafe32{
-							Height: height,
-							Index:  index,
-						}
-						blockData.multiSigAsMulti.MaybeTimePoint = maybeTimePoint
 
-						//switch param.Value.(type) {
-						//case map[string]interface{}:
-						//	d, _ := json.Marshal(param.Value)
-						//	var value expand.TimePointSafe32
-						//	err = json.Unmarshal(d, &value)
-						//	if err != nil {
-						//		continue
-						//	}
-						//
-						//	blockData.multiSigAsMulti.MaybeTimePoint.Height = value.Height
-						//	blockData.multiSigAsMulti.MaybeTimePoint.Index = value.Index
-						//
-						//default:
-						//	continue
-						//}
-					}
-					if param.Name == "calls" {
-						switch param.Value.(type) {
-						case []interface{}:
-							d, _ := json.Marshal(param.Value)
-							var values []models.UtilityParamsValue
-							err = json.Unmarshal(d, &values)
-							if err != nil {
+						if param.Name == "maybe_timepoint" {
+							height := types.NewOptionU32(0)
+							index := types.NewU32(0)
+							if param.Value == nil {
 								continue
 							}
+							for i, value := range param.Value.([]interface{}) {
+								if i == 0 {
+									height.SetSome(types.U32(value.(float64)))
+								}
+								if i == 1 {
+									index = types.U32(value.(float64))
+								}
+							}
+							var maybeTimePoint = expand.TimePointSafe32{
+								Height: height,
+								Index:  index,
+							}
+							blockData.multiSigAsMulti.MaybeTimePoint = maybeTimePoint
+						}
+						if param.Name == "calls" {
+							switch param.Value.(type) {
+							case []interface{}:
+								d, _ := json.Marshal(param.Value)
+								var values []models.UtilityParamsValue
+								err = json.Unmarshal(d, &values)
+								if err != nil {
+									continue
+								}
 
-							if values[0].CallFunction == "transfer" || values[0].CallFunction == "transfer_keep_alive" {
-								for _, value := range values {
-									if value.CallModule == "Balances" {
-										if value.CallFunction == "transfer" || value.CallFunction == "transfer_keep_alive" {
-											if len(value.CallArgs) > 0 {
-												for _, arg := range value.CallArgs {
-													if arg.Name == "dest" {
-														blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.Prefix)
-														blockData.era = resp.Era
-														blockData.sig = resp.Signature
-														blockData.nonce = resp.Nonce
-														blockData.fee, _ = c.GetPartialFee(extrinsic, blockResp.ParentHash)
-														blockData.txid = c.createTxHash(extrinsic)
-														blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
-														//blockData.multiSigAsMulti.DestAddress, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
-														blockData.recipient = arg.ValueRaw
-														blockData.multiSigAsMulti.DestAddress = arg.ValueRaw
-													}
-													if arg.Name == "value" {
-														amount := arg.Value.(float64)
-														blockData.multiSigAsMulti.DestAmount = strconv.FormatFloat(amount, 'f', -1, 64)
+								if values[0].CallFunction == "transfer" {
+									for _, value := range values {
+										if value.CallModule == "XAssets" {
+											if value.CallFunction == "transfer" {
+												if len(value.CallArgs) > 0 {
+													for _, arg := range value.CallArgs {
+														if arg.Name == "dest" {
+															blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.Prefix)
+															blockData.era = resp.Era
+															blockData.sig = resp.Signature
+															blockData.nonce = resp.Nonce
+															blockData.fee, _ = c.GetPartialFee(extrinsic, blockResp.ParentHash)
+															blockData.txid = c.createTxHash(extrinsic)
+															blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
+															//blockData.multiSigAsMulti.DestAddress, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
+															blockData.recipient = arg.ValueRaw
+															blockData.multiSigAsMulti.DestAddress = arg.ValueRaw
+														}
+														if arg.Name == "id" {
+															blockData.tokenId = xevents.AssetId(arg.Value.(float64))
+														}
+														if arg.Name == "value" {
+															amount := arg.Value.(float64)
+															blockData.multiSigAsMulti.DestAmount = strconv.FormatFloat(amount, 'f', -1, 64)
+															blockData.amount = strconv.FormatFloat(amount, 'f', -1, 64)
+														}
 													}
 												}
 											}
 										}
 									}
 								}
+							default:
+								continue
 							}
-						default:
-							continue
+						}
+						if param.Name == "store_call" {
+							blockData.multiSigAsMulti.StoreCall = param.Value.(bool)
+						}
+						if param.Name == "max_weight" {
+							blockData.multiSigAsMulti.MaxWeight = uint64(param.Value.(float64))
 						}
 					}
-					if param.Name == "store_call" {
-						blockData.multiSigAsMulti.StoreCall = param.Value.(bool)
-					}
-					if param.Name == "max_weight" {
-						blockData.multiSigAsMulti.MaxWeight = uint64(param.Value.(float64))
-					}
+					params = append(params, blockData)
 				}
-				params = append(params, blockData)
+			} else {
+				if resp.CallModuleFunction == "as_multi" {
+					blockData := parseBlockExtrinsicParams{}
+					blockData.what = "as_multi_raw"
+					blockData.era = resp.Era
+					blockData.sig = resp.Signature
+					blockData.nonce = resp.Nonce
+					blockData.extrinsicIdx = i
+					blockData.fee, err = c.GetPartialFee(extrinsic, blockResp.ParentHash)
+					blockData.txid = c.createTxHash(extrinsic)
+					blockData.length = resp.Length
+					for _, param := range resp.Params {
+						if param.Name == "threshold" {
+							blockData.multiSigAsMulti.Threshold = uint16(param.Value.(float64))
+							continue
+						}
+						if param.Name == "other_signatories" {
+							for _, value := range param.Value.([]interface{}) {
+								blockData.multiSigAsMulti.OtherSignatories = append(blockData.multiSigAsMulti.OtherSignatories, value.(string))
+							}
+							continue
+						}
+
+						if param.Name == "maybe_timepoint" {
+							height := types.NewOptionU32(0)
+							index := types.NewU32(0)
+							if param.Value == nil {
+								continue
+							}
+							for i, value := range param.Value.([]interface{}) {
+								if i == 0 {
+									height.SetSome(types.U32(value.(float64)))
+								}
+								if i == 1 {
+									index = types.U32(value.(float64))
+								}
+							}
+							var maybeTimePoint = expand.TimePointSafe32{
+								Height: height,
+								Index:  index,
+							}
+							blockData.multiSigAsMulti.MaybeTimePoint = maybeTimePoint
+						}
+						if param.Name == "calls" {
+							switch param.Value.(type) {
+							case []interface{}:
+								d, _ := json.Marshal(param.Value)
+								var values []models.UtilityParamsValue
+								err = json.Unmarshal(d, &values)
+								if err != nil {
+									continue
+								}
+
+								if values[0].CallFunction == "transfer" || values[0].CallFunction == "transfer_keep_alive" {
+									for _, value := range values {
+										if value.CallModule == "Balances" {
+											if value.CallFunction == "transfer" || value.CallFunction == "transfer_keep_alive" {
+												if len(value.CallArgs) > 0 {
+													for _, arg := range value.CallArgs {
+														if arg.Name == "dest" {
+															blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.Prefix)
+															blockData.era = resp.Era
+															blockData.sig = resp.Signature
+															blockData.nonce = resp.Nonce
+															blockData.fee, _ = c.GetPartialFee(extrinsic, blockResp.ParentHash)
+															blockData.txid = c.createTxHash(extrinsic)
+															blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
+															//blockData.multiSigAsMulti.DestAddress, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
+															blockData.recipient = arg.ValueRaw
+															blockData.multiSigAsMulti.DestAddress = arg.ValueRaw
+														}
+														if arg.Name == "value" {
+															amount := arg.Value.(float64)
+															blockData.multiSigAsMulti.DestAmount = strconv.FormatFloat(amount, 'f', -1, 64)
+															blockData.amount = strconv.FormatFloat(amount, 'f', -1, 64)
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							default:
+								continue
+							}
+						}
+						if param.Name == "store_call" {
+							blockData.multiSigAsMulti.StoreCall = param.Value.(bool)
+						}
+						if param.Name == "max_weight" {
+							blockData.multiSigAsMulti.MaxWeight = uint64(param.Value.(float64))
+						}
+					}
+					params = append(params, blockData)
+				}
 			}
-
 		case "Utility":
-			if resp.CallModuleFunction == "batch" {
-				blockData := parseBlockExtrinsicParams{}
-				for _, param := range resp.Params {
-					if param.Name == "calls" {
-						switch param.Value.(type) {
-						case []interface{}:
-							d, _ := json.Marshal(param.Value)
-							var values []models.UtilityParamsValue
-							err = json.Unmarshal(d, &values)
-							if err != nil {
-								continue
-							}
+			if string(c.Prefix) == string(ss58.ChainXPrefix) || c.Name == "chainx" {
+				if resp.CallModuleFunction == "batch" {
+					blockData := parseBlockExtrinsicParams{}
+					for _, param := range resp.Params {
+						if param.Name == "calls" {
+							switch param.Value.(type) {
+							case []interface{}:
+								d, _ := json.Marshal(param.Value)
+								var values []models.UtilityParamsValue
+								err = json.Unmarshal(d, &values)
+								if err != nil {
+									continue
+								}
 
-							if values[0].CallFunction == "transfer" || values[0].CallFunction == "transfer_keep_alive" && values[1].CallFunction == "remark" {
-								blockData.what = "multi_sign_batch"
-								blockData.extrinsicIdx = i
+								if values[0].CallFunction == "transfer" && values[1].CallFunction == "remark" {
+									blockData.what = "multi_sign_batch"
+									blockData.extrinsicIdx = i
 
-								for _, value := range values {
-									if value.CallModule == "Balances" {
-										if value.CallFunction == "transfer" || value.CallFunction == "transfer_keep_alive" {
-											if len(value.CallArgs) > 0 {
-												for _, arg := range value.CallArgs {
-													if arg.Name == "dest" {
-														blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.Prefix)
-														blockData.era = resp.Era
-														blockData.sig = resp.Signature
-														blockData.nonce = resp.Nonce
-														blockData.fee, _ = c.GetPartialFee(extrinsic, blockResp.ParentHash)
-														blockData.txid = c.createTxHash(extrinsic)
-														blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
+									for _, value := range values {
+										if value.CallModule == "XAssets" {
+											if value.CallFunction == "transfer" {
+												if len(value.CallArgs) > 0 {
+													for _, arg := range value.CallArgs {
+														if arg.Name == "dest" {
+															blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.Prefix)
+															blockData.era = resp.Era
+															blockData.sig = resp.Signature
+															blockData.nonce = resp.Nonce
+															blockData.fee, _ = c.GetPartialFee(extrinsic, blockResp.ParentHash)
+															blockData.txid = c.createTxHash(extrinsic)
+															blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
+														}
+														if arg.Name == "id" {
+															blockData.tokenId = xevents.AssetId(arg.Value.(float64))
+														}
+														if arg.Name == "value" {
+															amount := arg.Value.(float64)
+															blockData.amount = strconv.FormatFloat(amount, 'f', -1, 64)
+														}
 													}
 												}
 											}
 										}
-									}
-									if value.CallModule == "System" {
-										if value.CallFunction == "remark" {
-											if len(value.CallArgs) > 0 {
-												for _, arg := range value.CallArgs {
-													fmt.Printf("%v\n", arg)
-													if arg.Name == "_remark" {
-														blockData.recipient = arg.ValueRaw
-														//blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
+										if value.CallModule == "System" {
+											if value.CallFunction == "remark" {
+												if len(value.CallArgs) > 0 {
+													for _, arg := range value.CallArgs {
+														fmt.Printf("%v\n", arg)
+														if arg.Name == "_remark" {
+															blockData.recipient = arg.ValueRaw
+															//blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
+														}
 													}
 												}
 											}
 										}
 									}
 								}
+							default:
+								continue
 							}
-						default:
-							continue
 						}
 					}
+					params = append(params, blockData)
 				}
-				params = append(params, blockData)
+			} else {
+				if resp.CallModuleFunction == "batch" {
+					blockData := parseBlockExtrinsicParams{}
+					for _, param := range resp.Params {
+						if param.Name == "calls" {
+							switch param.Value.(type) {
+							case []interface{}:
+								d, _ := json.Marshal(param.Value)
+								var values []models.UtilityParamsValue
+								err = json.Unmarshal(d, &values)
+								if err != nil {
+									continue
+								}
+
+								if values[0].CallFunction == "transfer" || values[0].CallFunction == "transfer_keep_alive" && values[1].CallFunction == "remark" {
+									blockData.what = "multi_sign_batch"
+									blockData.extrinsicIdx = i
+
+									for _, value := range values {
+										if value.CallModule == "Balances" {
+											if value.CallFunction == "transfer" || value.CallFunction == "transfer_keep_alive" {
+												if len(value.CallArgs) > 0 {
+													for _, arg := range value.CallArgs {
+														if arg.Name == "dest" {
+															blockData.from, _ = ss58.EncodeByPubHex(resp.AccountId, c.Prefix)
+															blockData.era = resp.Era
+															blockData.sig = resp.Signature
+															blockData.nonce = resp.Nonce
+															blockData.fee, _ = c.GetPartialFee(extrinsic, blockResp.ParentHash)
+															blockData.txid = c.createTxHash(extrinsic)
+															blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
+														}
+														if arg.Name == "value" {
+															amount := arg.Value.(float64)
+															blockData.amount = strconv.FormatFloat(amount, 'f', -1, 64)
+														}
+													}
+												}
+											}
+										}
+										if value.CallModule == "System" {
+											if value.CallFunction == "remark" {
+												if len(value.CallArgs) > 0 {
+													for _, arg := range value.CallArgs {
+														fmt.Printf("%v\n", arg)
+														if arg.Name == "_remark" {
+															blockData.recipient = arg.ValueRaw
+															//blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							default:
+								continue
+							}
+						}
+					}
+					params = append(params, blockData)
+				}
 			}
 		case "XAssets":
 			if resp.CallModuleFunction == "transfer" {
@@ -443,7 +599,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 						blockData.to, _ = ss58.EncodeByPubHex(param.Value.(string), c.Prefix)
 					}
 					if param.Name == "id" {
-						blockData.tokenId = chainx.AssetId(param.Value.(float64))
+						blockData.tokenId = xevents.AssetId(param.Value.(float64))
 					}
 				}
 				params = append(params, blockData)
@@ -463,11 +619,16 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 	blockResp.Extrinsic = make([]*models.ExtrinsicResponse, len(params))
 	for idx, param := range params {
 		e := new(models.ExtrinsicResponse)
+		if string(c.Prefix) == string(ss58.ChainXPrefix) {
+			/// XBTC
+			e.AssetId = param.tokenId
+		}
+
 		//custom struct
 		e.Type = param.what
 		e.Recipient = param.recipient
 		e.MultiSigAsMulti = param.multiSigAsMulti
-		e.Amount = param.multiSigAsMulti.DestAmount
+		e.Amount = param.amount
 
 		//essential struct
 		e.Signature = param.sig
@@ -545,7 +706,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 			var r models.EventResult
 			r.ExtrinsicIdx = extrinsicIdx
 
-			r.Status = polkadot.UtilityBatch
+			r.Status = base.UtilityBatch
 			res = append(res, r)
 		}
 	}
@@ -563,7 +724,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 				r.From = ""
 				continue
 			}
-			r.Status = polkadot.AsMultiNew
+			r.Status = base.AsMultiNew
 			//r.Weight = c.getWeight(&events, r.ExtrinsicIdx)
 			res = append(res, r)
 		}
@@ -582,7 +743,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 				r.From = ""
 				continue
 			}
-			r.Status = polkadot.AsMultiApprove
+			r.Status = base.AsMultiApprove
 			//r.Weight = c.getWeight(&events, r.ExtrinsicIdx)
 			res = append(res, r)
 		}
@@ -602,7 +763,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 				r.From = ""
 				continue
 			}
-			r.Status = polkadot.AsMultiExecuted
+			r.Status = base.AsMultiExecuted
 			//r.Weight = c.getWeight(&events, r.ExtrinsicIdx)
 			res = append(res, r)
 		}
@@ -622,7 +783,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 				r.From = ""
 				continue
 			}
-			r.Status = polkadot.AsMultiCancelled
+			r.Status = base.AsMultiCancelled
 			//r.Weight = c.getWeight(&events, r.ExtrinsicIdx)
 			res = append(res, r)
 		}
@@ -664,7 +825,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 			for _, r := range res {
 				if e.ExtrinsicIndex == r.ExtrinsicIdx {
 					/// Batch(Transfer,Remark)
-					if r.Status == polkadot.UtilityBatch {
+					if r.Status == base.UtilityBatch {
 						/// e.type == multi_sign_batch
 						if failedMap[e.ExtrinsicIndex] {
 							e.Status = "fail"
@@ -674,7 +835,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 					}
 					if e.FromAddress == r.From {
 						/// MultiNew
-						if r.Status == polkadot.AsMultiNew {
+						if r.Status == base.AsMultiNew {
 							e.Type = r.Status
 							if failedMap[e.ExtrinsicIndex] {
 								e.Status = "fail"
@@ -683,7 +844,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 							}
 						}
 						/// MultiApprove
-						if r.Status == polkadot.AsMultiApprove {
+						if r.Status == base.AsMultiApprove {
 							e.Type = r.Status
 							if failedMap[e.ExtrinsicIndex] {
 								e.Status = "fail"
@@ -692,7 +853,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 							}
 						}
 						/// MultiExecuted
-						if r.Status == polkadot.AsMultiExecuted {
+						if r.Status == base.AsMultiExecuted {
 							e.Type = r.Status
 							if failedMap[e.ExtrinsicIndex] {
 								e.Status = "fail"
@@ -701,7 +862,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 							}
 						}
 						///MultiCancelled
-						if r.Status == polkadot.AsMultiCancelled {
+						if r.Status == base.AsMultiCancelled {
 							e.Type = r.Status
 							if failedMap[e.ExtrinsicIndex] {
 								e.Status = "fail"
@@ -717,8 +878,8 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 						} else {
 							e.Status = "success"
 						}
-						e.Amount = r.Amount
-						e.ToAddress = r.To
+						//e.Amount = r.Amount
+						//e.ToAddress = r.To
 						//计算手续费
 						//e.Fee = c.calcFee(&events, e.ExtrinsicIndex)
 					}
