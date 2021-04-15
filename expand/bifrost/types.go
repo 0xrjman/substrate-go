@@ -2,7 +2,7 @@ package bifrost
 
 import (
 	"fmt"
-	"github.com/rjman-self/go-polkadot-rpc-client/expand/base"
+	"github.com/rjman-self/substrate-go/expand/base"
 	"github.com/rjmand/go-substrate-rpc-client/v2/scale"
 	"github.com/rjmand/go-substrate-rpc-client/v2/types"
 )

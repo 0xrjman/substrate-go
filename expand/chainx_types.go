@@ -3,8 +3,8 @@ package expand
 import (
 	"fmt"
 	"github.com/huandu/xstrings"
-	"github.com/rjman-self/go-polkadot-rpc-client/expand/chainx/xevents"
-	"github.com/rjman-self/go-polkadot-rpc-client/utils"
+	"github.com/rjman-self/substrate-go/expand/chainx/xevents"
+	"github.com/rjman-self/substrate-go/utils"
 	"github.com/rjmand/go-substrate-rpc-client/v2/scale"
 	"github.com/rjmand/go-substrate-rpc-client/v2/types"
 )

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/huandu/xstrings"
-	"github.com/rjman-self/go-polkadot-rpc-client/utils"
+	"github.com/rjman-self/substrate-go/utils"
 	"github.com/rjmand/go-substrate-rpc-client/v2/types"
 )
 

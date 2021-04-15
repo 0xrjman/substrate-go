@@ -1,8 +1,8 @@
 package chainx
 
 import (
-	"github.com/rjman-self/go-polkadot-rpc-client/expand/chainx/xevents"
-	"github.com/rjman-self/go-polkadot-rpc-client/expand/chainx/xevents/xgateway"
+	"github.com/rjman-self/substrate-go/expand/chainx/xevents"
+	"github.com/rjman-self/substrate-go/expand/chainx/xevents/xgateway"
 	"github.com/rjmand/go-substrate-rpc-client/v2/types"
 )
 

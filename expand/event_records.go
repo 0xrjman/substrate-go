@@ -1,9 +1,9 @@
 package expand
 
 import (
-	"github.com/rjman-self/go-polkadot-rpc-client/expand/bifrost"
-	"github.com/rjman-self/go-polkadot-rpc-client/expand/chainx"
-	"github.com/rjman-self/go-polkadot-rpc-client/expand/polkadot"
+	"github.com/rjman-self/substrate-go/expand/bifrost"
+	"github.com/rjman-self/substrate-go/expand/chainx"
+	"github.com/rjman-self/substrate-go/expand/polkadot"
 	"github.com/rjmand/go-substrate-rpc-client/v2/types"
 	"strings"
 )

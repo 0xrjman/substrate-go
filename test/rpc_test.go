@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/JFJun/go-substrate-crypto/ss58"
-	"github.com/rjman-self/go-polkadot-rpc-client/client"
+	"github.com/rjman-self/substrate-go/client"
 	"testing"
 )
 

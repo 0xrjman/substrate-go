@@ -1,8 +1,8 @@
 package models
 
 import (
-	"github.com/rjman-self/go-polkadot-rpc-client/expand"
-	"github.com/rjman-self/go-polkadot-rpc-client/expand/chainx/xevents"
+	"github.com/rjman-self/substrate-go/expand"
+	"github.com/rjman-self/substrate-go/expand/chainx/xevents"
 )
 
 type Bytes []byte
