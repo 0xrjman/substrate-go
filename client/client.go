@@ -662,10 +662,10 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 			err = fmt.Errorf("panic decode event: %v", err1)
 		}
 	}()
-	//if len(blockResp.Extrinsic) <= 0 {
-	//	//不包含交易就不处理了
-	//	return nil
-	//}
+	if len(blockResp.Extrinsic) <= 0 {
+		//不包含交易就不处理了
+		return nil
+	}
 	// 1. 先创建System.event的storageKey
 	storage, err = types.CreateStorageKey(c.Meta, "System", "Events", nil, nil)
 	if err != nil {

@@ -10,7 +10,8 @@ import (
 
 //const url = "wss://supercube.pro/ws"
 //const url = "wss://chainx.elara.patract.io"
-const url = "ws://127.0.0.1:8087"
+//const url = "ws://127.0.0.1:8087"
+const url = "wss://xbridge.spiderx.pro/ws"
 
 func Test_GetBlockByNumber(t *testing.T) {
 	c, err := client.New(url)
@@ -20,12 +21,12 @@ func Test_GetBlockByNumber(t *testing.T) {
 
 	c.SetPrefix(ss58.ChainXPrefix)
 	//expand.SetSerDeOptions(false)
-	resp, err := c.GetBlockByNumber(24417)
+	resp, err := c.GetBlockByNumber(14223)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	hash, err := c.Api.RPC.Chain.GetBlockHash(24417)
+	hash, err := c.Api.RPC.Chain.GetBlockHash(14223)
 	block, err := c.Api.RPC.Chain.GetBlock(hash)
 	if err != nil {
 		fmt.Printf("GetBlockHash err\n")

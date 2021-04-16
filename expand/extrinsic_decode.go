@@ -325,7 +325,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				//err = vec.ProcessFirstVec(decoder, tc)
 				err = vec.ProcessOpaqueCallVec(decoder, tc)
 				if err != nil {
-					return fmt.Errorf("decode call: decode MultiSig.AsMulti => Assets.transfer error: %v", err)
+					return fmt.Errorf("decode call: ulti => Assets.transfer error: %v", err)
 				}
 
 				ep := ExtrinsicParam{}
@@ -381,7 +381,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 					})
 
 				//6. decode Weight
-				var maxWeight uint64
+				var maxWeight types.Weight
 				err = decoder.Decode(&maxWeight)
 				if err != nil {
 					fmt.Printf("decode call: decode Multi.as_multi.max_weight error: %v", err)

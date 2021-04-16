@@ -219,7 +219,6 @@ func (e *MetadataExpand) BalanceTransferCall(to string, amount uint64) (types.Ca
 	ma.AccountId = types.NewAccountID(types.MustHexDecodeString(recipientPubkey))
 	return NewCall(callIdx, ma,
 		types.NewUCompactFromUInt(amount))
-
 }
 
 /*
