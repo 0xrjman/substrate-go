@@ -589,6 +589,8 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 							data["call_function"] = cn
 							data["call_module"] = mn
 							result = append(result, data)
+						} else {
+							return fmt.Errorf("decode Utility.batch error: not XAssets.transfer, %v\n", err)
 						}
 					}
 					if i == 1 {
@@ -611,6 +613,8 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 							data["call_function"] = cn
 							data["call_module"] = mn
 							result = append(result, data)
+						} else {
+							return fmt.Errorf("decode Utility.batch error: not System.remark, %v\n", err)
 						}
 					}
 				}
@@ -667,6 +671,8 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 							data["call_function"] = cn
 							data["call_module"] = mn
 							result = append(result, data)
+						} else {
+							return fmt.Errorf("decode Utility.batch error: not Balances.transfer, %v\n", err)
 						}
 					}
 					if i == 1 {
@@ -689,6 +695,8 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 							data["call_function"] = cn
 							data["call_module"] = mn
 							result = append(result, data)
+						} else {
+							return fmt.Errorf("decode Utility.batch error: not System.remark, %v\n", err)
 						}
 					}
 				}

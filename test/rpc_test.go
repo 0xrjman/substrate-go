@@ -12,7 +12,7 @@ import (
 //const url = "wss://chainx.elara.patract.io"
 //const url = "ws://127.0.0.1:8087"
 //const url = "wss://xbridge.spiderx.pro/ws"
-const url = "wss://rpc.polkadot.io"
+const url = "wss://polkadot.elara.patract.io"
 
 func Test_GetBlockByNumber(t *testing.T) {
 	c, err := client.New(url)
@@ -22,15 +22,35 @@ func Test_GetBlockByNumber(t *testing.T) {
 
 	c.SetPrefix(ss58.PolkadotPrefix)
 	//expand.SetSerDeOptions(false)
-	resp, err := c.GetBlockByNumber(4738994)
+	resp, err := c.GetBlockByNumber(4744169)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	hash, err := c.Api.RPC.Chain.GetBlockHash(4738994)
-	block, err := c.Api.RPC.Chain.GetBlock(hash)
+	hash, err := c.Api.RPC.Chain.GetBlockHash(4744169)
 	if err != nil {
 		fmt.Printf("GetBlockHash err\n")
+	}
+
+	block, err := c.Api.RPC.Chain.GetBlock(hash)
+	if err != nil {
+		fmt.Printf("GetBlock err\n")
+		//api, _ := gsrpc.NewSubstrateAPI(url)
+		//
+		//hash, err := api.RPC.Chain.GetBlockHash(4744169)
+		//if err != nil {
+		//	fmt.Printf("GetBlockHash err\n")
+		//}
+		//
+		//block, err := api.RPC.Chain.GetBlock(hash)
+		//if err != nil {
+		//	fmt.Printf("Get Block err\n")
+		//}
+		//
+		//if block != nil {
+		//	currentBlock := int64(block.Block.Header.Number)
+		//	fmt.Printf("block is %v\n", currentBlock)
+		//}
 	}
 
 	if block != nil {
