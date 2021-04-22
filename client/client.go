@@ -212,7 +212,8 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 		}
 		err = ed.ProcessExtrinsicDecoder(*decoder, c.Name)
 		if err != nil {
-			return fmt.Errorf("decode extrinsic error: %v", err)
+			//log.Printf("decode extrinsic error: %v\n", err)
+			continue
 		}
 		var resp models.ExtrinsicDecodeResponse
 		d, _ := json.Marshal(ed.Value)
@@ -253,6 +254,10 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 				for _, param := range resp.Params {
 					if param.Name == "dest" {
 						blockData.to, _ = ss58.EncodeByPubHex(param.Value.(string), c.Prefix)
+					}
+					if param.Name == "value" {
+						amount := param.Value.(float64)
+						blockData.amount = strconv.FormatFloat(amount, 'f', -1, 64)
 					}
 				}
 				params = append(params, blockData)
@@ -662,10 +667,10 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 			err = fmt.Errorf("panic decode event: %v", err1)
 		}
 	}()
-	if len(blockResp.Extrinsic) <= 0 {
-		//不包含交易就不处理了
-		return nil
-	}
+	//if len(blockResp.Extrinsic) <= 0 {
+	//	//不包含交易就不处理了
+	//	return nil
+	//}
 	// 1. 先创建System.event的storageKey
 	storage, err = types.CreateStorageKey(c.Meta, "System", "Events", nil, nil)
 	if err != nil {

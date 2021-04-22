@@ -138,7 +138,7 @@ func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder, chain
 	if ed.CallIndex != "" {
 		err = ed.decodeCallIndex(decoder, chainName)
 		if err != nil {
-			fmt.Errorf("decodeCallIndex err: %v\n", err)
+			return fmt.Errorf("decodeCallIndex err: %v\n", err)
 		}
 	}
 	result := map[string]interface{}{
@@ -170,7 +170,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 	//避免指针为空
 	defer func() {
 		if errs := recover(); errs != nil {
-			err = fmt.Errorf("decode call catch panic ,err=%v", errs)
+			err = fmt.Errorf("decode call catch panic ,err=%v\n", errs)
 		}
 	}()
 	//	解析 call index
@@ -178,7 +178,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 	// 这里我只解析自己想要的，比如说Timestamp,Balance.transfer,Utility.batch
 	modName, callName, err := ed.me.MV.FindNameByCallIndex(ed.CallIndex)
 	if err != nil {
-		return fmt.Errorf("decode call: %v", err)
+		return fmt.Errorf("decode call: %v\n", err)
 	}
 	ed.CallModule = modName
 	ed.CallModuleFunction = callName
@@ -552,14 +552,14 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				var tc xTransferCall
 				err = vec.ProcessFirstVec(decoder, tc)
 				if err != nil {
-					return fmt.Errorf("decode call: decode Utility.batch => XAssets.transfer error: %v", err)
+					return fmt.Errorf("decode call: decode Utility.batch => XAssets.transfer error: %v\n", err)
 				}
 
 				// 2: System.remark
 				var rc RemarkCall
 				err := vec.ProcessSecondVec(decoder, rc)
 				if err != nil {
-					fmt.Printf("decode call: decode Utility.batch => System.remark error: %v\n", err)
+					return fmt.Errorf("decode call: decode Utility.batch => System.remark error: %v\n", err)
 				}
 
 				//utils.CheckStructData(vec.Value)
@@ -576,15 +576,15 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 						callIndex := data["call_index"].(string)
 						btCallIdx, err := ed.me.MV.GetCallIndex("XAssets", "transfer")
 						if err != nil {
-							return fmt.Errorf("decode Utility.batch: get  XAssets.transfer call index error: %v", err)
+							return fmt.Errorf("decode Utility.batch: get  XAssets.transfer call index error: %v\n", err)
 						}
 						if callIndex == btCallIdx {
 							mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
 							if err != nil {
-								return fmt.Errorf("decode Utility.batch: get call index error: %v", err)
+								return fmt.Errorf("decode Utility.batch: get call index error: %v\n", err)
 							}
 							if mn != "XAssets" {
-								return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)
+								return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s\n", mn)
 							}
 							data["call_function"] = cn
 							data["call_module"] = mn
@@ -598,15 +598,15 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 						callIndex := data["call_index"].(string)
 						srCallIdx, err := ed.me.MV.GetCallIndex("System", "remark")
 						if err != nil {
-							return fmt.Errorf("decode Utility.batch: get  Balances.transfer call index error: %v", err)
+							return fmt.Errorf("decode Utility.batch: get  Balances.transfer call index error: %v\n", err)
 						}
 						if callIndex == srCallIdx {
 							mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
 							if err != nil {
-								return fmt.Errorf("decode Utility.batch: get call index error: %v", err)
+								return fmt.Errorf("decode Utility.batch: get call index error: %v\n", err)
 							}
 							if mn != "System" {
-								return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)
+								return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s\n", mn)
 							}
 							data["call_function"] = cn
 							data["call_module"] = mn
@@ -626,14 +626,14 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				var tc TransferCall
 				err = vec.ProcessFirstVec(decoder, tc)
 				if err != nil {
-					return fmt.Errorf("decode call: decode Utility.batch => Balances.transfer error: %v", err)
+					return fmt.Errorf("decode call: decode Utility.batch => Balances.transfer error: %v\n", err)
 				}
 
 				// 2: System.remark
 				var rc RemarkCall
 				err := vec.ProcessSecondVec(decoder, rc)
 				if err != nil {
-					fmt.Printf("decode call: decode Utility.batch => System.remark error: %v\n", err)
+					return fmt.Errorf("decode call: decode Utility.batch => System.remark error: %v\n", err)
 				}
 
 				//utils.CheckStructData(vec.Value)
@@ -650,19 +650,19 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 						callIndex := data["call_index"].(string)
 						btCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer")
 						if err != nil {
-							return fmt.Errorf("decode Utility.batch: get  Balances.transfer call index error: %v", err)
+							return fmt.Errorf("decode Utility.batch: get  Balances.transfer call index error: %v\n", err)
 						}
 						btkaCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer_keep_alive")
 						if err != nil {
-							return fmt.Errorf("decode Utility.batch: get  Balances.transfer_keep_alive call index error: %v", err)
+							return fmt.Errorf("decode Utility.batch: get  Balances.transfer_keep_alive call index error: %v\n", err)
 						}
 						if callIndex == btCallIdx || callIndex == btkaCallIdx {
 							mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
 							if err != nil {
-								return fmt.Errorf("decode Utility.batch: get call index error: %v", err)
+								return fmt.Errorf("decode Utility.batch: get call index error: %v\n", err)
 							}
 							if mn != "Balances" {
-								return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)
+								return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s\n", mn)
 							}
 							data["call_function"] = cn
 							data["call_module"] = mn
@@ -676,15 +676,15 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 						callIndex := data["call_index"].(string)
 						srCallIdx, err := ed.me.MV.GetCallIndex("System", "remark")
 						if err != nil {
-							return fmt.Errorf("decode Utility.batch: get  Balances.transfer call index error: %v", err)
+							return fmt.Errorf("decode Utility.batch: get  Balances.transfer call index error: %v\n", err)
 						}
 						if callIndex == srCallIdx {
 							mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
 							if err != nil {
-								return fmt.Errorf("decode Utility.batch: get call index error: %v", err)
+								return fmt.Errorf("decode Utility.batch: get call index error: %v\n", err)
 							}
 							if mn != "System" {
-								return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)
+								return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s\n", mn)
 							}
 							data["call_function"] = cn
 							data["call_module"] = mn
