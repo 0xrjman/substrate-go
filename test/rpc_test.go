@@ -8,11 +8,13 @@ import (
 	"testing"
 )
 
-//const url = "wss://supercube.pro/ws"
+const url = "wss://supercube.pro/ws"
 //const url = "wss://chainx.elara.patract.io"
 //const url = "ws://127.0.0.1:8087"
 //const url = "wss://xbridge.spiderx.pro/ws"
-const url = "wss://polkadot.elara.patract.io"
+//const url = "wss://polkadot.elara.patract.io"
+
+const testBlock = 215758
 
 func Test_GetBlockByNumber(t *testing.T) {
 	c, err := client.New(url)
@@ -22,37 +24,17 @@ func Test_GetBlockByNumber(t *testing.T) {
 
 	c.SetPrefix(ss58.PolkadotPrefix)
 	//expand.SetSerDeOptions(false)
-	resp, err := c.GetBlockByNumber(4744169)
+	resp, err := c.GetBlockByNumber(testBlock)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	hash, err := c.Api.RPC.Chain.GetBlockHash(4744169)
+	hash, err := c.Api.RPC.Chain.GetBlockHash(testBlock)
 	if err != nil {
 		fmt.Printf("GetBlockHash err\n")
 	}
 
 	block, err := c.Api.RPC.Chain.GetBlock(hash)
-	if err != nil {
-		fmt.Printf("GetBlock err\n")
-		//api, _ := gsrpc.NewSubstrateAPI(url)
-		//
-		//hash, err := api.RPC.Chain.GetBlockHash(4744169)
-		//if err != nil {
-		//	fmt.Printf("GetBlockHash err\n")
-		//}
-		//
-		//block, err := api.RPC.Chain.GetBlock(hash)
-		//if err != nil {
-		//	fmt.Printf("Get Block err\n")
-		//}
-		//
-		//if block != nil {
-		//	currentBlock := int64(block.Block.Header.Number)
-		//	fmt.Printf("block is %v\n", currentBlock)
-		//}
-	}
-
 	if block != nil {
 		currentBlock := int64(block.Block.Header.Number)
 		fmt.Printf("block is %v\n", currentBlock)
@@ -60,6 +42,11 @@ func Test_GetBlockByNumber(t *testing.T) {
 
 	d, _ := json.Marshal(resp)
 	fmt.Println(string(d))
+}
+func checkErr(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
 
 func Test_GetAccountInfo(t *testing.T) {

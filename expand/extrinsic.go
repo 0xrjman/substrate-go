@@ -20,13 +20,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/rjmand/go-substrate-rpc-client/v2/types"
+	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 	"io"
 	"math/big"
 	"strings"
 
-	"github.com/rjmand/go-substrate-rpc-client/v2/scale"
-	"github.com/rjmand/go-substrate-rpc-client/v2/signature"
+	"github.com/centrifuge/go-substrate-rpc-client/v3/scale"
+	"github.com/centrifuge/go-substrate-rpc-client/v3/signature"
 )
 
 const (

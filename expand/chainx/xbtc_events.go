@@ -3,7 +3,7 @@ package chainx
 import (
 	"github.com/rjman-self/substrate-go/expand/chainx/xevents"
 	"github.com/rjman-self/substrate-go/expand/chainx/xevents/xgateway"
-	"github.com/rjmand/go-substrate-rpc-client/v2/types"
+	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 )
 
 type XBtcV1 struct {

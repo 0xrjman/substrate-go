@@ -6,7 +6,7 @@ import (
 	"github.com/JFJun/go-substrate-crypto/crypto"
 	"github.com/rjman-self/substrate-go/expand"
 	"github.com/rjman-self/substrate-go/utils"
-	"github.com/rjmand/go-substrate-rpc-client/v2/types"
+	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 	"golang.org/x/crypto/blake2b"
 	"strings"
 )

@@ -7,16 +7,16 @@ import (
 	"errors"
 	"fmt"
 	"github.com/JFJun/go-substrate-crypto/ss58"
+	gsrc "github.com/centrifuge/go-substrate-rpc-client/v3"
+	gsClient "github.com/centrifuge/go-substrate-rpc-client/v3/client"
+	"github.com/centrifuge/go-substrate-rpc-client/v3/rpc"
+	"github.com/centrifuge/go-substrate-rpc-client/v3/scale"
+	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 	"github.com/rjman-self/substrate-go/expand"
 	"github.com/rjman-self/substrate-go/expand/base"
 	"github.com/rjman-self/substrate-go/expand/chainx/xevents"
 	"github.com/rjman-self/substrate-go/models"
 	"github.com/rjman-self/substrate-go/utils"
-	gsrc "github.com/rjmand/go-substrate-rpc-client/v2"
-	gsClient "github.com/rjmand/go-substrate-rpc-client/v2/client"
-	"github.com/rjmand/go-substrate-rpc-client/v2/rpc"
-	"github.com/rjmand/go-substrate-rpc-client/v2/scale"
-	"github.com/rjmand/go-substrate-rpc-client/v2/types"
 	"golang.org/x/crypto/blake2b"
 	"log"
 	"strconv"
@@ -942,7 +942,7 @@ func (c *Client) GetAccountInfo(address string) (*types.AccountInfo, error) {
 			return nil, fmt.Errorf("get account info error: %v", err)
 		}
 		accountInfo.Nonce = accountInfoProviders.Nonce
-		accountInfo.Refcount = types.U8(accountInfoProviders.Consumers)
+		accountInfo.Consumers = accountInfoProviders.Consumers
 		accountInfo.Data.Free = accountInfoProviders.Data.Free
 		accountInfo.Data.FreeFrozen = accountInfoProviders.Data.FreeFrozen
 		accountInfo.Data.MiscFrozen = accountInfoProviders.Data.MiscFrozen
