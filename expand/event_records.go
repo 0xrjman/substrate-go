@@ -45,7 +45,21 @@ func DecodeEventRecords(meta *types.Metadata, rawData string, chainName string) 
 			return nil, err
 		}
 		ier = &events
-	case "chainx":
+	case ChainNet:
+		var events chainx.ChainXEventRecords
+		err := e.DecodeEventRecords(meta, &events)
+		if err != nil {
+			return nil, err
+		}
+		ier = &events
+	case ChainXbtc:
+		var events chainx.ChainXEventRecords
+		err := e.DecodeEventRecords(meta, &events)
+		if err != nil {
+			return nil, err
+		}
+		ier = &events
+	case ChainXpcx:
 		var events chainx.ChainXEventRecords
 		err := e.DecodeEventRecords(meta, &events)
 		if err != nil {

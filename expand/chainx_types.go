@@ -9,8 +9,6 @@ import (
 	"github.com/rjmand/go-substrate-rpc-client/v2/types"
 )
 
-const ChinaX string = "chainx"
-
 type xTransferCall struct {
 	Value interface{}
 }
