@@ -12,7 +12,9 @@ import (
 //const url = "wss://chainx.elara.patract.io"
 //const url = "ws://127.0.0.1:8087"
 //const url = "wss://xbridge.spiderx.pro/ws"
-const url = "wss://polkadot.elara.patract.io"
+//const url = "wss://polkadot.elara.patract.io"
+//const url = "wss://dot.supercube.pro/ws"
+const url = "wss://chainx.supercube.pro/ws"
 
 func Test_GetBlockByNumber(t *testing.T) {
 	c, err := client.New(url)
@@ -20,14 +22,15 @@ func Test_GetBlockByNumber(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	c.SetPrefix(ss58.PolkadotPrefix)
+	c.SetPrefix(ss58.ChainXPrefix)
+
 	//expand.SetSerDeOptions(false)
-	resp, err := c.GetBlockByNumber(4744169)
+	resp, err := c.GetBlockByNumber(32100)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	hash, err := c.Api.RPC.Chain.GetBlockHash(4744169)
+	hash, err := c.Api.RPC.Chain.GetBlockHash(32100)
 	if err != nil {
 		fmt.Printf("GetBlockHash err\n")
 	}

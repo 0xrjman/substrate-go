@@ -249,7 +249,8 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				})
 		}
 	case "Multisig":
-		if ed.checkChainX(chainName) {
+		if ed.checkChainX(chainName) && chainName == ChainXbtc {
+			/// Chain is ChainX-XBTC
 			if callName == "as_multi" {
 				//1. decode threshold
 				var threshold uint16
@@ -543,8 +544,8 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 		}
 	case "Utility":
 		/// Check whether ChainX
-		if ed.checkChainX(chainName) {
-			/// Chain is ChainX
+		if ed.checkChainX(chainName) && chainName == ChainXbtc {
+			/// Chain is ChainX-XBTC
 			if callName == "batch" {
 				vec := new(Vec)
 
@@ -704,7 +705,6 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				ed.Params = append(ed.Params, ep)
 			}
 		}
-
 	case "XAssets":
 		if callName == "transfer" {
 			var address MultiAddress
@@ -766,7 +766,7 @@ func (ed *ExtrinsicDecoder) checkChainX(chainName string) bool {
 	if err == nil {
 		isChainX = true
 	}
-	if isChainX || chainName == "dev" || chainName == "chainx" {
+	if isChainX || chainName == ChainNet  || chainName == ChainXbtc || chainName == ChainXpcx {
 		return true
 	} else {
 		return false

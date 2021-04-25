@@ -15,6 +15,13 @@ import (
 	"reflect"
 )
 
+const(
+	ChainXbtc = "chainxbtc"
+	ChainXpcx = "chainxpcx"
+	ChainNet = "chainx"
+	PcxAssetId = 6
+)
+
 type Balance struct {
 	Reader io.Reader
 	Value  decimal.Decimal

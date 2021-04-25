@@ -263,7 +263,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 				params = append(params, blockData)
 			}
 		case "Multisig":
-			if string(c.Prefix) == string(ss58.ChainXPrefix) || c.Name == "chainx" {
+			if string(c.Prefix) == string(ss58.ChainXPrefix) && c.Name == expand.ChainXbtc {
 				if resp.CallModuleFunction == "as_multi" {
 					blockData := parseBlockExtrinsicParams{}
 					blockData.what = "as_multi_raw"
@@ -458,7 +458,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 				}
 			}
 		case "Utility":
-			if string(c.Prefix) == string(ss58.ChainXPrefix) || c.Name == "chainx" {
+			if string(c.Prefix) == string(ss58.ChainXPrefix) && c.Name == expand.ChainXbtc {
 				if resp.CallModuleFunction == "batch" {
 					blockData := parseBlockExtrinsicParams{}
 					for _, param := range resp.Params {
@@ -575,6 +575,9 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 													}
 												}
 											}
+										}
+										if c.Name == expand.ChainNet || c.Name == expand.ChainXpcx {
+											blockData.tokenId = xevents.AssetId(expand.PcxAssetId)
 										}
 									}
 								}
