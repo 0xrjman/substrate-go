@@ -18,7 +18,7 @@ func (t *xTransferCall) Decode(decoder scale.Decoder) error {
 	b := make([]byte, 2)
 	err := decoder.Read(b)
 	if err != nil {
-		return fmt.Errorf("deode transfer call: read callIdx bytes error: %v", err)
+		return fmt.Errorf("deode transfer call: read callIdx bytes error: %v\n", err)
 	}
 	callIdx := xstrings.RightJustify(utils.IntToHex(b[0]), 2, "0") + xstrings.RightJustify(utils.IntToHex(b[1]), 2, "0")
 	result := map[string]interface{}{
@@ -30,7 +30,7 @@ func (t *xTransferCall) Decode(decoder scale.Decoder) error {
 	var address MultiAddress
 	err = decoder.Decode(&address)
 	if err != nil {
-		return fmt.Errorf("decode call: decode XAssets.transfer.Address error: %v", err)
+		return fmt.Errorf("decode call: decode XAssets.transfer.Address error: %v\n", err)
 	}
 	param = append(param,
 		ExtrinsicParam{
@@ -44,7 +44,7 @@ func (t *xTransferCall) Decode(decoder scale.Decoder) error {
 	var optionId types.UCompact
 	err = decoder.Decode(&optionId)
 	if err != nil {
-		return fmt.Errorf("decode call: decode XAssets.transfer.AssetId error: %v", err)
+		return fmt.Errorf("decode call: decode XAssets.transfer.AssetId error: %v\n", err)
 	}
 	assetId := types.U32(utils.UCompactToBigInt(optionId).Uint64())
 	param = append(param,
@@ -59,7 +59,7 @@ func (t *xTransferCall) Decode(decoder scale.Decoder) error {
 
 	err = decoder.Decode(&balance)
 	if err != nil {
-		return fmt.Errorf("decode call: decode XAssets.transfer.Compact<Balance> error: %v", err)
+		return fmt.Errorf("decode call: decode XAssets.transfer.Compact<Balance> error: %v\n", err)
 	}
 	amount := utils.UCompactToBigInt(balance).Int64()
 	param = append(param,
@@ -82,7 +82,7 @@ func (t *xTransferOpaqueCall) Decode(decoder scale.Decoder) error {
 	b := make([]byte, 2)
 	err := decoder.Read(b)
 	if err != nil {
-		return fmt.Errorf("deode transfer call: read callIdx bytes error: %v", err)
+		return fmt.Errorf("deode transfer call: read callIdx bytes error: %v\n", err)
 	}
 	callIdx := xstrings.RightJustify(utils.IntToHex(b[0]), 2, "0") + xstrings.RightJustify(utils.IntToHex(b[1]), 2, "0")
 	result := map[string]interface{}{
@@ -93,7 +93,7 @@ func (t *xTransferOpaqueCall) Decode(decoder scale.Decoder) error {
 	var address types.AccountID
 	err = decoder.Decode(&address)
 	if err != nil {
-		return fmt.Errorf("decode call: decode XAssets.transfer.Address error: %v", err)
+		return fmt.Errorf("decode call: decode XAssets.transfer.Address error: %v\n", err)
 	}
 	param = append(param,
 		ExtrinsicParam{
@@ -107,7 +107,7 @@ func (t *xTransferOpaqueCall) Decode(decoder scale.Decoder) error {
 	var optionId types.UCompact
 	err = decoder.Decode(&optionId)
 	if err != nil {
-		return fmt.Errorf("decode call: decode XAssets.transfer.AssetId error: %v", err)
+		return fmt.Errorf("decode call: decode XAssets.transfer.AssetId error: %v\n", err)
 	}
 	assetId := xevents.AssetId(utils.UCompactToBigInt(optionId).Int64())
 
@@ -122,7 +122,7 @@ func (t *xTransferOpaqueCall) Decode(decoder scale.Decoder) error {
 	var balance types.UCompact
 	err = decoder.Decode(&balance)
 	if err != nil {
-		return fmt.Errorf("decode call: decode XAssets.transfer.Compact<Balance> error: %v", err)
+		return fmt.Errorf("decode call: decode XAssets.transfer.Compact<Balance> error: %v\n", err)
 	}
 	amount := utils.UCompactToBigInt(balance).Int64()
 	param = append(param,

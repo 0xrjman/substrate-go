@@ -73,17 +73,17 @@ func (c *Client) checkRuntimeVersion() error {
 	v, err := c.Api.RPC.State.GetRuntimeVersionLatest()
 	if err != nil {
 		if !strings.Contains(err.Error(), "tls: use of closed connection") {
-			return fmt.Errorf("init runtime version error,err=%v", err)
+			return fmt.Errorf("init runtime version error,err=%v\n", err)
 		}
 		//	重连处理，这是因为第三方包的问题，所以只能这样处理了了
 		cl, err := c.reConnectWs()
 		if err != nil {
-			return fmt.Errorf("reconnect error: %v", err)
+			return fmt.Errorf("reconnect error: %v\n", err)
 		}
 		c.Api = cl
 		v, err = c.Api.RPC.State.GetRuntimeVersionLatest()
 		if err != nil {
-			return fmt.Errorf("init runtime version error,aleady reconnect,err: %v", err)
+			return fmt.Errorf("init runtime version error,aleady reconnect,err: %v\n", err)
 		}
 	}
 	c.TransactionVersion = int(v.TransactionVersion)
@@ -97,7 +97,7 @@ func (c *Client) checkRuntimeVersion() error {
 	if specVersion != c.SpecVersion {
 		c.Meta, err = c.Api.RPC.State.GetMetadataLatest()
 		if err != nil {
-			return fmt.Errorf("init metadata error: %v", err)
+			return fmt.Errorf("init metadata error: %v\n", err)
 		}
 		c.SpecVersion = specVersion
 	}
@@ -154,7 +154,7 @@ func (c *Client) GetBlockByHash(blockHash string) (*models.BlockResponse, error)
 	}
 	err = c.Api.Client.Call(&block, "chain_getBlock", blockHash)
 	if err != nil {
-		return nil, fmt.Errorf("get block error: %v", err)
+		return nil, fmt.Errorf("get block error: %v\n", err)
 	}
 	blockResp := new(models.BlockResponse)
 	number, _ := strconv.ParseInt(utils.RemoveHex0x(block.Block.Header.Number), 16, 64)
@@ -207,12 +207,12 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 		extrinsic = utils.Remove0X(extrinsic)
 		data, err := hex.DecodeString(extrinsic)
 		if err != nil {
-			return fmt.Errorf("hex.decode extrinsic error: %v", err)
+			return fmt.Errorf("hex.decode extrinsic error: %v\n", err)
 		}
 		decoder := scale.NewDecoder(bytes.NewReader(data))
 		ed, err := expand.NewExtrinsicDecoder(c.Meta)
 		if err != nil {
-			return fmt.Errorf("new extrinsic decode error: %v", err)
+			return fmt.Errorf("new extrinsic decode error: %v\n", err)
 		}
 		err = ed.ProcessExtrinsicDecoder(*decoder, c.Name)
 		if err != nil {
@@ -226,7 +226,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 		}
 		err = json.Unmarshal(d, &resp)
 		if err != nil {
-			return fmt.Errorf("json unmarshal extrinsic decode error: %v", err)
+			return fmt.Errorf("json unmarshal extrinsic decode error: %v\n", err)
 		}
 		switch resp.CallModule {
 		case "System":
@@ -671,7 +671,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 	)
 	defer func() {
 		if err1 := recover(); err1 != nil {
-			err = fmt.Errorf("panic decode event: %v", err1)
+			err = fmt.Errorf("panic decode event: %v\n", err1)
 		}
 	}()
 	//if len(blockResp.Extrinsic) <= 0 {
@@ -681,7 +681,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 	// 1. 先创建System.event的storageKey
 	storage, err = types.CreateStorageKey(c.Meta, "System", "Events", nil, nil)
 	if err != nil {
-		return fmt.Errorf("create storage key error: %v", err)
+		return fmt.Errorf("create storage key error: %v\n", err)
 	}
 	key := storage.Hex()
 	var result interface{}
@@ -690,12 +690,12 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 	*/
 	err = c.Api.Client.Call(&result, "state_getStorageAt", key, blockHash)
 	if err != nil {
-		return fmt.Errorf("get storage data error: %v", err)
+		return fmt.Errorf("get storage data error: %v\n", err)
 	}
 	//解析event信息
 	ier, err := expand.DecodeEventRecords(c.Meta, result.(string), c.Name)
 	if err != nil {
-		return fmt.Errorf("decode event data error: %v", err)
+		return fmt.Errorf("decode event data error: %v\n", err)
 	}
 	//d,_:=json.Marshal(ier)
 	//fmt.Println(string(d))
@@ -923,7 +923,7 @@ func (c *Client) GetAccountInfo(address string) (*types.AccountInfo, error) {
 	)
 	defer func() {
 		if err1 := recover(); err1 != nil {
-			err = fmt.Errorf("panic decode event: %v", err1)
+			err = fmt.Errorf("panic decode event: %v\n", err1)
 		}
 	}()
 	err = c.checkRuntimeVersion()
@@ -932,11 +932,11 @@ func (c *Client) GetAccountInfo(address string) (*types.AccountInfo, error) {
 	}
 	pub, err = ss58.DecodeToPub(address)
 	if err != nil {
-		return nil, fmt.Errorf("ss58 decode address error: %v", err)
+		return nil, fmt.Errorf("ss58 decode address error: %v\n", err)
 	}
 	storage, err = types.CreateStorageKey(c.Meta, "System", "Account", pub, nil)
 	if err != nil {
-		return nil, fmt.Errorf("create System.Account storage error: %v", err)
+		return nil, fmt.Errorf("create System.Account storage error: %v\n", err)
 	}
 	var accountInfo types.AccountInfo
 	var ok bool
@@ -946,7 +946,7 @@ func (c *Client) GetAccountInfo(address string) (*types.AccountInfo, error) {
 		var accountInfoProviders expand.AccountInfoWithProviders
 		ok, err = c.Api.RPC.State.GetStorageLatest(storage, &accountInfoProviders)
 		if err != nil || !ok {
-			return nil, fmt.Errorf("get account info error: %v", err)
+			return nil, fmt.Errorf("get account info error: %v\n", err)
 		}
 		accountInfo.Nonce = accountInfoProviders.Nonce
 		accountInfo.Refcount = types.U8(accountInfoProviders.Consumers)
@@ -957,7 +957,7 @@ func (c *Client) GetAccountInfo(address string) (*types.AccountInfo, error) {
 	default:
 		ok, err = c.Api.RPC.State.GetStorageLatest(storage, &accountInfo)
 		if err != nil || !ok {
-			return nil, fmt.Errorf("get account info error: %v", err)
+			return nil, fmt.Errorf("get account info error: %v\n", err)
 		}
 	}
 
@@ -974,14 +974,14 @@ func (c *Client) GetPartialFee(extrinsic, parentHash string) (string, error) {
 	var result map[string]interface{}
 	err := c.Api.Client.Call(&result, "payment_queryInfo", extrinsic, parentHash)
 	if err != nil {
-		return "", fmt.Errorf("get payment info error: %v", err)
+		return "", fmt.Errorf("get payment info error: %v\n", err)
 	}
 	if result["partialFee"] == nil {
 		return "", errors.New("result partialFee is nil ptr")
 	}
 	fee, ok := result["partialFee"].(string)
 	if !ok {
-		return "", fmt.Errorf("partialFee is not string type: %v", result["partialFee"])
+		return "", fmt.Errorf("partialFee is not string type: %v\n", result["partialFee"])
 	}
 	return fee, nil
 }

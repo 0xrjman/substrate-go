@@ -22,16 +22,16 @@ func Test_GetBlockByNumber(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	c.Name = expand.ChainXbtc
+	c.Name = expand.ChainXpcx
 	c.SetPrefix(ss58.ChainXPrefix)
 
 	//expand.SetSerDeOptions(false)
-	resp, err := c.GetBlockByNumber(32871)
+	resp, err := c.GetBlockByNumber(33967)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	hash, err := c.Api.RPC.Chain.GetBlockHash(32871)
+	hash, err := c.Api.RPC.Chain.GetBlockHash(33967)
 	if err != nil {
 		fmt.Printf("GetBlockHash err\n")
 	}

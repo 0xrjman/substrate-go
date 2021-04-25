@@ -65,7 +65,7 @@ func (b *Balance) Decode(decoder scale.Decoder) error {
 	data := make([]byte, 16)
 	err := decoder.Read(data)
 	if err != nil {
-		return fmt.Errorf("decode balance: read bytes error: %v", err)
+		return fmt.Errorf("decode balance: read bytes error: %v\n", err)
 	}
 	buf.Write(data)
 	c := make([]byte, 16)
@@ -89,7 +89,7 @@ func (v *Vec) ProcessVec(decoder scale.Decoder, subType interface{}) error {
 	var u types.UCompact
 	err := decoder.Decode(&u)
 	if err != nil {
-		return fmt.Errorf("decode Vec: get length error: %v", err)
+		return fmt.Errorf("decode Vec: get length error: %v\n", err)
 	}
 	length := int(utils.UCompactToBigInt(u).Int64())
 	if length > 5000 {
@@ -104,7 +104,7 @@ func (v *Vec) ProcessVec(decoder scale.Decoder, subType interface{}) error {
 		subType := tmp.Interface()
 		err = decoder.Decode(subType)
 		if err != nil {
-			return fmt.Errorf("decode Vec: decoder subtype error: %v", err)
+			return fmt.Errorf("decode Vec: decoder subtype error: %v\n", err)
 		}
 		v.Value = append(v.Value, subType)
 	}
@@ -115,7 +115,7 @@ func (v *Vec) ProcessFirstVec(decoder scale.Decoder, subType interface{}) error 
 	var u types.UCompact
 	err := decoder.Decode(&u)
 	if err != nil {
-		return fmt.Errorf("decode Vec: get length error: %v", err)
+		return fmt.Errorf("decode Vec: get length error: %v\n", err)
 	}
 	length := int(utils.UCompactToBigInt(u).Int64())
 	if length > 5000 {
@@ -130,7 +130,7 @@ func (v *Vec) ProcessFirstVec(decoder scale.Decoder, subType interface{}) error 
 		subType := tmp.Interface()
 		err = decoder.Decode(subType)
 		if err != nil {
-			return fmt.Errorf("decode Vec: decoder subtype error: %v", err)
+			return fmt.Errorf("decode Vec: decoder subtype error: %v\n", err)
 		}
 		v.Value = append(v.Value, subType)
 	}
@@ -146,7 +146,7 @@ func (v *Vec) ProcessSecondVec(decoder scale.Decoder, subType interface{}) error
 	subType = tmp.Interface()
 	err := decoder.Decode(subType)
 	if err != nil {
-		return fmt.Errorf("decode Vec: decoder subtype error: %v", err)
+		return fmt.Errorf("decode Vec: decoder subtype error: %v\n", err)
 	}
 	v.Value = append(v.Value, subType)
 	return nil
@@ -155,13 +155,13 @@ func (v *Vec) ProcessOpaqueCallVec(decoder scale.Decoder, subType interface{}) e
 	var u types.UCompact
 	err := decoder.Decode(&u)
 	if err != nil {
-		return fmt.Errorf("decode Vec: get length error: %v", err)
+		return fmt.Errorf("decode Vec: get length error: %v\n", err)
 	}
 
 	var dropBool uint8
 	err = decoder.Decode(&dropBool)
 	if err != nil {
-		return fmt.Errorf("decode Vec: get bool error: %v", err)
+		return fmt.Errorf("decode Vec: get bool error: %v\n", err)
 	}
 
 	length := int(utils.UCompactToBigInt(u).Int64())
@@ -177,7 +177,7 @@ func (v *Vec) ProcessOpaqueCallVec(decoder scale.Decoder, subType interface{}) e
 		subType := tmp.Interface()
 		err = decoder.Decode(subType)
 		if err != nil {
-			return fmt.Errorf("decode Vec: decoder subtype error: %v", err)
+			return fmt.Errorf("decode Vec: decoder subtype error: %v\n", err)
 		}
 		v.Value = append(v.Value, subType)
 	}
@@ -197,7 +197,7 @@ func (t *TransferCall) Decode(decoder scale.Decoder) error {
 	b := make([]byte, 2)
 	err := decoder.Read(b)
 	if err != nil {
-		return fmt.Errorf("deode transfer call: read callIdx bytes error: %v", err)
+		return fmt.Errorf("deode transfer call: read callIdx bytes error: %v\n", err)
 	}
 	callIdx := xstrings.RightJustify(utils.IntToHex(b[0]), 2, "0") + xstrings.RightJustify(utils.IntToHex(b[1]), 2, "0")
 	result := map[string]interface{}{
@@ -208,7 +208,7 @@ func (t *TransferCall) Decode(decoder scale.Decoder) error {
 	var address MultiAddress
 	err = decoder.Decode(&address)
 	if err != nil {
-		return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v", err)
+		return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v\n", err)
 	}
 	param = append(param,
 		ExtrinsicParam{
@@ -222,7 +222,7 @@ func (t *TransferCall) Decode(decoder scale.Decoder) error {
 
 	err = decoder.Decode(&bb)
 	if err != nil {
-		return fmt.Errorf("decode call: decode Balances.transfer.Compact<Balance> error: %v", err)
+		return fmt.Errorf("decode call: decode Balances.transfer.Compact<Balance> error: %v\n", err)
 	}
 	v := utils.UCompactToBigInt(bb).Int64()
 	param = append(param,
@@ -245,7 +245,7 @@ func (t *TransferOpaqueCall) Decode(decoder scale.Decoder) error {
 	b := make([]byte, 2)
 	err := decoder.Read(b)
 	if err != nil {
-		return fmt.Errorf("deode transfer call: read callIdx bytes error: %v", err)
+		return fmt.Errorf("deode transfer call: read callIdx bytes error: %v\n", err)
 	}
 	callIdx := xstrings.RightJustify(utils.IntToHex(b[0]), 2, "0") + xstrings.RightJustify(utils.IntToHex(b[1]), 2, "0")
 	result := map[string]interface{}{
@@ -256,7 +256,7 @@ func (t *TransferOpaqueCall) Decode(decoder scale.Decoder) error {
 	var address types.AccountID
 	err = decoder.Decode(&address)
 	if err != nil {
-		return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v", err)
+		return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v\n", err)
 	}
 	param = append(param,
 		ExtrinsicParam{
@@ -270,7 +270,7 @@ func (t *TransferOpaqueCall) Decode(decoder scale.Decoder) error {
 
 	err = decoder.Decode(&bb)
 	if err != nil {
-		return fmt.Errorf("decode call: decode Balances.transfer.Compact<Balance> error: %v", err)
+		return fmt.Errorf("decode call: decode Balances.transfer.Compact<Balance> error: %v\n", err)
 	}
 	v := utils.UCompactToBigInt(bb).Int64()
 	param = append(param,
@@ -293,7 +293,7 @@ func (r *RemarkCall) Decode(decoder scale.Decoder) error {
 	b := make([]byte, 2)
 	err := decoder.Read(b)
 	if err != nil {
-		return fmt.Errorf("deode transfer call: read callIdx bytes error: %v", err)
+		return fmt.Errorf("deode transfer call: read callIdx bytes error: %v\n", err)
 	}
 	callIdx := xstrings.RightJustify(utils.IntToHex(b[0]), 2, "0") + xstrings.RightJustify(utils.IntToHex(b[1]), 2, "0")
 	result := map[string]interface{}{
@@ -304,7 +304,7 @@ func (r *RemarkCall) Decode(decoder scale.Decoder) error {
 	var remark string
 	err = decoder.Decode(&remark)
 	if err != nil {
-		return fmt.Errorf("decode call: decode System.remark error: %v", err)
+		return fmt.Errorf("decode call: decode System.remark error: %v\n", err)
 	}
 
 	param = append(param,
@@ -327,14 +327,14 @@ type Address struct {
 func (a *Address) Decode(decoder scale.Decoder) error {
 	al, err := decoder.ReadOneByte()
 	if err != nil {
-		return fmt.Errorf("decode address: get account length error: %v", err)
+		return fmt.Errorf("decode address: get account length error: %v\n", err)
 	}
 	a.AccountLength = utils.BytesToHex([]byte{al})
 	if a.AccountLength == "ff" {
 		data := make([]byte, 32)
 		err = decoder.Read(data)
 		if err != nil {
-			return fmt.Errorf("decode address: get address 32 bytes error: %v", err)
+			return fmt.Errorf("decode address: get address 32 bytes error: %v\n", err)
 		}
 		a.Value = utils.BytesToHex(data)
 		return nil
@@ -342,7 +342,7 @@ func (a *Address) Decode(decoder scale.Decoder) error {
 	d := make([]byte, 31)
 	err = decoder.Read(d)
 	if err != nil {
-		return fmt.Errorf("decode address: get address 31 bytes error: %v", err)
+		return fmt.Errorf("decode address: get address 31 bytes error: %v\n", err)
 	}
 	a.Value = utils.BytesToHex(append([]byte{al}, d...))
 	return nil
@@ -357,7 +357,7 @@ func (u *U32) Decode(decoder scale.Decoder) error {
 	data := make([]byte, 4)
 	err := decoder.Read(data)
 	if err != nil {
-		return fmt.Errorf("decode u32 : read 4 bytes error: %v", err)
+		return fmt.Errorf("decode u32 : read 4 bytes error: %v\n", err)
 	}
 	u.Value = binary.LittleEndian.Uint32(data)
 	return nil
@@ -385,19 +385,19 @@ type WeightToFeeCoefficient struct {
 func (d *WeightToFeeCoefficient) Decode(decoder scale.Decoder) error {
 	err := decoder.Decode(&d.CoeffInteger)
 	if err != nil {
-		return fmt.Errorf("decode WeightToFeeCoefficient: decode CoeffInteger error: %v", err)
+		return fmt.Errorf("decode WeightToFeeCoefficient: decode CoeffInteger error: %v\n", err)
 	}
 	err = decoder.Decode(&d.CoeffFrac)
 	if err != nil {
-		return fmt.Errorf("decode WeightToFeeCoefficient: decode CoeffFrac error: %v", err)
+		return fmt.Errorf("decode WeightToFeeCoefficient: decode CoeffFrac error: %v\n", err)
 	}
 	err = decoder.Decode(&d.Negative)
 	if err != nil {
-		return fmt.Errorf("decode WeightToFeeCoefficient: decode Negative error: %v", err)
+		return fmt.Errorf("decode WeightToFeeCoefficient: decode Negative error: %v\n", err)
 	}
 	err = decoder.Decode(&d.Degree)
 	if err != nil {
-		return fmt.Errorf("decode WeightToFeeCoefficient: decode Degree error: %v", err)
+		return fmt.Errorf("decode WeightToFeeCoefficient: decode Degree error: %v\n", err)
 	}
 	return nil
 }
@@ -421,7 +421,7 @@ type GenericMultiAddress struct {
 func (d *GenericMultiAddress) Decode(decoder scale.Decoder) error {
 	b, err := decoder.ReadOneByte()
 	if err != nil {
-		return fmt.Errorf("generic MultiAddress read on bytes error: %v", err)
+		return fmt.Errorf("generic MultiAddress read on bytes error: %v\n", err)
 	}
 	switch int(b) {
 	case 0:
@@ -454,22 +454,22 @@ func (d GenericMultiAddress) Encode(encoder scale.Encoder) error {
 	switch d.types {
 	case 0:
 		if &d.AccountId == nil {
-			err = fmt.Errorf("generic MultiAddress id is null:%v", d.AccountId)
+			err = fmt.Errorf("generic MultiAddress id is null:%v\n", d.AccountId)
 		}
 		err = encoder.Encode(d.AccountId)
 	case 1:
 		if &d.Index == nil {
-			err = fmt.Errorf("generic MultiAddress index is null:%v", d.Index)
+			err = fmt.Errorf("generic MultiAddress index is null:%v\n", d.Index)
 		}
 		err = encoder.Encode(d.Index)
 	case 2:
 		if &d.Address32 == nil {
-			err = fmt.Errorf("generic MultiAddress address32 is null:%v", d.Address32)
+			err = fmt.Errorf("generic MultiAddress address32 is null:%v\n", d.Address32)
 		}
 		err = encoder.Encode(d.Address32)
 	case 3:
 		if &d.Address20 == nil {
-			err = fmt.Errorf("generic MultiAddress address20 is null:%v", d.Address20)
+			err = fmt.Errorf("generic MultiAddress address20 is null:%v\n", d.Address20)
 		}
 		err = encoder.Encode(d.Address20)
 	default:

@@ -103,7 +103,7 @@ func (tx *SubstrateTransaction) SignTransaction(privateKey string, signType int)
 	//签名
 	err := tx.signTx(e, o, privateKey, signType)
 	if err != nil {
-		return "", fmt.Errorf("sign error: %v", err)
+		return "", fmt.Errorf("sign error: %v\n", err)
 	}
 	return types.EncodeToHexString(e)
 }
@@ -135,7 +135,7 @@ func (tx *SubstrateTransaction) signTx(e *expand.Extrinsic, o types.SignatureOpt
 	// sign
 	data, err := types.EncodeToBytes(payload)
 	if err != nil {
-		return fmt.Errorf("encode payload error: %v", err)
+		return fmt.Errorf("encode payload error: %v\n", err)
 	}
 	// if data is longer than 256 bytes, hash it first
 	if len(data) > 256 {
@@ -145,13 +145,13 @@ func (tx *SubstrateTransaction) signTx(e *expand.Extrinsic, o types.SignatureOpt
 	privateKey = strings.TrimPrefix(privateKey, "0x")
 	priv, err := hex.DecodeString(privateKey)
 	if err != nil {
-		return fmt.Errorf("hex decode private key error: %v", err)
+		return fmt.Errorf("hex decode private key error: %v\n", err)
 	}
 
 	defer utils.ZeroBytes(priv)
 	sig, err := crypto.Sign(priv, data, signType)
 	if err != nil {
-		return fmt.Errorf("sign error: %v", err)
+		return fmt.Errorf("sign error: %v\n", err)
 	}
 
 	var ma expand.MultiAddress

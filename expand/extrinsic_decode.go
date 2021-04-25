@@ -52,12 +52,12 @@ func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder, chain
 	var length types.UCompact
 	err := decoder.Decode(&length)
 	if err != nil {
-		return fmt.Errorf("decode extrinsic: length error: %v", err)
+		return fmt.Errorf("decode extrinsic: length error: %v\n", err)
 	}
 	ed.ExtrinsicLength = int(utils.UCompactToBigInt(length).Int64())
 	vi, err := decoder.ReadOneByte()
 	if err != nil {
-		return fmt.Errorf("decode extrinsic: read version info error: %v", err)
+		return fmt.Errorf("decode extrinsic: read version info error: %v\n", err)
 	}
 	ed.VersionInfo = utils.BytesToHex([]byte{vi})
 	ed.ContainsTransaction = utils.U256(ed.VersionInfo).Int64() >= 80
@@ -68,14 +68,14 @@ func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder, chain
 			var address MultiAddress
 			err = decoder.Decode(&address)
 			if err != nil {
-				return fmt.Errorf("decode extrinsic: decode address error: %v", err)
+				return fmt.Errorf("decode extrinsic: decode address error: %v\n", err)
 			}
 			ed.Address = utils.BytesToHex(address.AccountId[:])
 			//2。解析签名版本
 			var sv types.U8
 			err = decoder.Decode(&sv)
 			if err != nil {
-				return fmt.Errorf("decode extrinsic: decode signature version error: %v", err)
+				return fmt.Errorf("decode extrinsic: decode signature version error: %v\n", err)
 			}
 			ed.SignatureVersion = int(sv)
 			// 3。 解析签名
@@ -84,7 +84,7 @@ func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder, chain
 				sig := make([]byte, 65)
 				err = decoder.Read(sig)
 				if err != nil {
-					return fmt.Errorf("decode extrinsic: decode ecdsa signature error: %v", err)
+					return fmt.Errorf("decode extrinsic: decode ecdsa signature error: %v\n", err)
 				}
 				ed.Signature = utils.BytesToHex(sig)
 			} else {
@@ -92,7 +92,7 @@ func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder, chain
 				var sig types.Signature
 				err = decoder.Decode(&sig)
 				if err != nil {
-					return fmt.Errorf("decode extrinsic: decode sr25519 signature error: %v", err)
+					return fmt.Errorf("decode extrinsic: decode sr25519 signature error: %v\n", err)
 				}
 				ed.Signature = sig.Hex()
 			}
@@ -100,7 +100,7 @@ func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder, chain
 			var era types.ExtrinsicEra
 			err = decoder.Decode(&era)
 			if err != nil {
-				return fmt.Errorf("decode extrinsic: decode era error: %v", err)
+				return fmt.Errorf("decode extrinsic: decode era error: %v\n", err)
 			}
 			if era.IsMortalEra {
 				eraBytes := []byte{era.AsMortalEra.First, era.AsMortalEra.Second}
@@ -110,7 +110,7 @@ func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder, chain
 			var nonce types.UCompact
 			err = decoder.Decode(&nonce)
 			if err != nil {
-				return fmt.Errorf("decode extrinsic: decode nonce error: %v", err)
+				return fmt.Errorf("decode extrinsic: decode nonce error: %v\n", err)
 			}
 			//new
 
@@ -120,7 +120,7 @@ func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder, chain
 
 			err = decoder.Decode(&tip)
 			if err != nil {
-				return fmt.Errorf("decode tip error: %v", err)
+				return fmt.Errorf("decode tip error: %v\n", err)
 			}
 			ed.Tip = fmt.Sprintf("%d", utils.UCompactToBigInt(tip).Int64())
 		}
@@ -128,7 +128,7 @@ func (ed *ExtrinsicDecoder) ProcessExtrinsicDecoder(decoder scale.Decoder, chain
 		callIndex := make([]byte, 2)
 		err = decoder.Read(callIndex)
 		if err != nil {
-			return fmt.Errorf("decode extrinsic: read call index bytes error: %v", err)
+			return fmt.Errorf("decode extrinsic: read call index bytes error: %v\n", err)
 		}
 		ed.CallIndex = xstrings.RightJustify(utils.IntToHex(callIndex[0]), 2, "0") +
 			xstrings.RightJustify(utils.IntToHex(callIndex[1]), 2, "0")
@@ -189,7 +189,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 			var s string
 			err = decoder.Decode(&s)
 			if err != nil {
-				return fmt.Errorf("decode call: decode Timestamp.set error: %v", err)
+				return fmt.Errorf("decode call: decode Timestamp.set error: %v\n", err)
 			}
 
 			ed.Params = append(ed.Params,
@@ -206,7 +206,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 			var u types.UCompact
 			err = decoder.Decode(&u)
 			if err != nil {
-				return fmt.Errorf("decode call: decode Timestamp.set error: %v", err)
+				return fmt.Errorf("decode call: decode Timestamp.set error: %v\n", err)
 			}
 
 			ed.Params = append(ed.Params,
@@ -223,7 +223,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 			var address MultiAddress
 			err = decoder.Decode(&address)
 			if err != nil {
-				return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v", err)
+				return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v\n", err)
 			}
 			addrValue = utils.BytesToHex(address.AccountId[:])
 
@@ -238,7 +238,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 			var b types.UCompact
 			err = decoder.Decode(&b)
 			if err != nil {
-				return fmt.Errorf("decode call: decode Balances.transfer.Compact<Balance> error: %v", err)
+				return fmt.Errorf("decode call: decode Balances.transfer.Compact<Balance> error: %v\n", err)
 			}
 
 			ed.Params = append(ed.Params,
@@ -269,7 +269,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				//err = decoder.Decode(&bt)
 				err = decoder.Decode(&address)
 				if err != nil {
-					return fmt.Errorf("decode call: decode Multi.as_multi.OtherSignatories error: %v", err)
+					return fmt.Errorf("decode call: decode Multi.as_multi.OtherSignatories error: %v\n", err)
 				}
 				for _, add := range address {
 					otherSignatories = append(otherSignatories, utils.BytesToHex(add[:]))
@@ -326,7 +326,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				//err = vec.ProcessFirstVec(decoder, tc)
 				err = vec.ProcessOpaqueCallVec(decoder, tc)
 				if err != nil {
-					return fmt.Errorf("decode call: ulti => Assets.transfer error: %v", err)
+					return fmt.Errorf("decode call: ulti => Assets.transfer error: %v\n", err)
 				}
 
 				ep := ExtrinsicParam{}
@@ -338,7 +338,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 					tcv := value.(*xTransferOpaqueCall)
 					btCallIdx, err := ed.me.MV.GetCallIndex("XAssets", "transfer")
 					if err != nil {
-						return fmt.Errorf("decode ChainX => Multisig.as_multi: get  Multisig.as_multi call index error: %v", err)
+						return fmt.Errorf("decode ChainX => Multisig.as_multi: get  Multisig.as_multi call index error: %v\n", err)
 					}
 
 					/// Check for XAssetsTransfer
@@ -350,12 +350,12 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 					callIndex := data["call_index"].(string)
 
 					if err != nil {
-						return fmt.Errorf("decode Multisig.as_multi: get  Balances.transfer_keep_alive call index error: %v", err)
+						return fmt.Errorf("decode Multisig.as_multi: get  Balances.transfer_keep_alive call index error: %v\n", err)
 					}
 					if callIndex == btCallIdx {
 						mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
 						if err != nil {
-							return fmt.Errorf("decode Multisig.as_multi: get call index error: %v", err)
+							return fmt.Errorf("decode Multisig.as_multi: get call index error: %v\n", err)
 						}
 						if mn != "XAssets" {
 							return fmt.Errorf("decode Utility.batch:  call module name is not 'XAssets' ,NAME=%s", mn)
@@ -371,7 +371,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				var storeCall bool
 				err = decoder.Decode(&storeCall)
 				if err != nil {
-					fmt.Printf("decode call: decode Multi.as_multi.store_call error: %v", err)
+					fmt.Printf("decode call: decode Multi.as_multi.store_call error: %v\n", err)
 				}
 
 				ed.Params = append(ed.Params,
@@ -385,7 +385,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				var maxWeight types.Weight
 				err = decoder.Decode(&maxWeight)
 				if err != nil {
-					fmt.Printf("decode call: decode Multi.as_multi.max_weight error: %v", err)
+					fmt.Printf("decode call: decode Multi.as_multi.max_weight error: %v\n", err)
 				}
 
 				ed.Params = append(ed.Params,
@@ -414,7 +414,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				//err = decoder.Decode(&bt)
 				err = decoder.Decode(&address)
 				if err != nil {
-					return fmt.Errorf("decode call: decode Multi.as_multi.OtherSignatories error: %v", err)
+					return fmt.Errorf("decode call: decode Multi.as_multi.OtherSignatories error: %v\n", err)
 				}
 				for _, add := range address {
 					otherSignatories = append(otherSignatories, utils.BytesToHex(add[:]))
@@ -471,7 +471,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				//err = vec.ProcessFirstVec(decoder, tc)
 				err = vec.ProcessOpaqueCallVec(decoder, tc)
 				if err != nil {
-					return fmt.Errorf("decode call: decode Utility.batch => Balances.transfer error: %v", err)
+					return fmt.Errorf("decode call: decode Utility.batch => Balances.transfer error: %v\n", err)
 				}
 
 				ep := ExtrinsicParam{}
@@ -483,7 +483,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 					tcv := value.(*TransferOpaqueCall)
 					btCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer")
 					if err != nil {
-						return fmt.Errorf("decode Multisig.as_multi: get  Multisig.as_multi call index error: %v", err)
+						return fmt.Errorf("decode Multisig.as_multi: get  Multisig.as_multi call index error: %v\n", err)
 					}
 					btkaCallIdx, err := ed.me.MV.GetCallIndex("Balances", "transfer_keep_alive")
 
@@ -496,12 +496,12 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 					callIndex := data["call_index"].(string)
 
 					if err != nil {
-						return fmt.Errorf("decode Multisig.as_multi: get  Balances.transfer_keep_alive call index error: %v", err)
+						return fmt.Errorf("decode Multisig.as_multi: get  Balances.transfer_keep_alive call index error: %v\n", err)
 					}
 					if callIndex == btCallIdx || callIndex == btkaCallIdx {
 						mn, cn, err := ed.me.MV.FindNameByCallIndex(callIndex)
 						if err != nil {
-							return fmt.Errorf("decode Multisig.as_multi: get call index error: %v", err)
+							return fmt.Errorf("decode Multisig.as_multi: get call index error: %v\n", err)
 						}
 						if mn != "Balances" {
 							return fmt.Errorf("decode Utility.batch:  call module name is not 'Balances' ,NAME=%s", mn)
@@ -517,7 +517,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				var storeCall bool
 				err = decoder.Decode(&storeCall)
 				if err != nil {
-					fmt.Printf("decode call: decode Multi.as_multi.store_call error: %v", err)
+					fmt.Printf("decode call: decode Multi.as_multi.store_call error: %v\n", err)
 				}
 
 				ed.Params = append(ed.Params,
@@ -531,7 +531,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				var maxWeight uint64
 				err = decoder.Decode(&maxWeight)
 				if err != nil {
-					fmt.Printf("decode call: decode Multi.as_multi.max_weight error: %v", err)
+					fmt.Printf("decode call: decode Multi.as_multi.max_weight error: %v\n", err)
 				}
 
 				ed.Params = append(ed.Params,
@@ -713,7 +713,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 			// 0 ---> 	Address
 			err = decoder.Decode(&address)
 			if err != nil {
-				return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v", err)
+				return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v\n", err)
 			}
 			addrValue = utils.BytesToHex(address.AccountId[:])
 
@@ -729,7 +729,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 			var id types.UCompact
 			err = decoder.Decode(&id)
 			if err != nil {
-				return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v", err)
+				return fmt.Errorf("decode call: decode Balances.transfer.Address error: %v\n", err)
 			}
 			ed.Params = append(ed.Params,
 				ExtrinsicParam{
@@ -742,7 +742,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 			var b types.UCompact
 			err = decoder.Decode(&b)
 			if err != nil {
-				return fmt.Errorf("decode call: decode Balances.transfer.Compact<Balance> error: %v", err)
+				return fmt.Errorf("decode call: decode Balances.transfer.Compact<Balance> error: %v\n", err)
 			}
 
 			ed.Params = append(ed.Params,

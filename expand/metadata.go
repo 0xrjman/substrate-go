@@ -45,7 +45,7 @@ func (v v11) GetCallIndex(moduleName, fn string) (callIdx string, err error) {
 	defer func() {
 		if errs := recover(); errs != nil {
 			callIdx = ""
-			err = fmt.Errorf("catch panic ,err=%v", errs)
+			err = fmt.Errorf("catch panic ,err=%v\n", errs)
 		}
 	}()
 	mi := uint8(0)
@@ -97,7 +97,7 @@ func (v v11) FindNameByCallIndex(callIdx string) (moduleName, fn string, err err
 func (v v11) GetConstants(modName, constantsName string) (constantsType string, constantsValue []byte, err error) {
 	defer func() {
 		if errs := recover(); errs != nil {
-			err = fmt.Errorf("catch panic ,err=%v", errs)
+			err = fmt.Errorf("catch panic ,err=%v\n", errs)
 		}
 	}()
 	for _, mod := range v.module {
@@ -156,7 +156,7 @@ func (v v12) GetCallIndex(moduleName, fn string) (callIdx string, err error) {
 	defer func() {
 		if errs := recover(); errs != nil {
 			callIdx = ""
-			err = fmt.Errorf("catch panic ,err=%v", errs)
+			err = fmt.Errorf("catch panic ,err=%v\n", errs)
 		}
 	}()
 	for _, mod := range v.module {
@@ -178,7 +178,7 @@ func (v v12) GetCallIndex(moduleName, fn string) (callIdx string, err error) {
 func (v v12) GetConstants(modName, constantsName string) (constantsType string, constantsValue []byte, err error) {
 	defer func() {
 		if errs := recover(); errs != nil {
-			err = fmt.Errorf("catch panic ,err=%v", errs)
+			err = fmt.Errorf("catch panic ,err=%v\n", errs)
 		}
 	}()
 	for _, mod := range v.module {

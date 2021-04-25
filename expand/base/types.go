@@ -217,7 +217,7 @@ func (d *VecU8L20) Decode(decoder scale.Decoder) error {
 	data := make([]byte, 20)
 	err := decoder.Read(data)
 	if err != nil {
-		return fmt.Errorf("U8L20 read bytes error: %v", err)
+		return fmt.Errorf("U8L20 read bytes error: %v\n", err)
 	}
 	d.Value = hex.EncodeToString(data)
 	return nil
@@ -231,7 +231,7 @@ func (d *VecU8L256) Decode(decoder scale.Decoder) error {
 	data := make([]byte, 256)
 	err := decoder.Read(data)
 	if err != nil {
-		return fmt.Errorf("U8L256 read bytes error: %v", err)
+		return fmt.Errorf("U8L256 read bytes error: %v\n", err)
 	}
 	d.Value = hex.EncodeToString(data)
 	return nil
@@ -245,7 +245,7 @@ func (d *VecU8L32) Decode(decoder scale.Decoder) error {
 	data := make([]byte, 32)
 	err := decoder.Read(data)
 	if err != nil {
-		return fmt.Errorf("U8L32 read bytes error: %v", err)
+		return fmt.Errorf("U8L32 read bytes error: %v\n", err)
 	}
 	d.Value = hex.EncodeToString(data)
 	return nil
