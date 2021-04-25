@@ -87,7 +87,11 @@ func (c *Client) checkRuntimeVersion() error {
 		}
 	}
 	c.TransactionVersion = int(v.TransactionVersion)
-	c.Name = v.SpecName
+	if c.Name == expand.ChainNet || c.Name == expand.ChainXbtc || c.Name == expand.ChainXpcx {
+		/// do nothing
+	} else {
+		c.Name = v.SpecName
+	}
 	specVersion := int(v.SpecVersion)
 	//检查metadata数据是否有升级
 	if specVersion != c.SpecVersion {

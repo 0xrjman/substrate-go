@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/JFJun/go-substrate-crypto/ss58"
 	"github.com/rjman-self/substrate-go/client"
+	"github.com/rjman-self/substrate-go/expand"
 	"testing"
 )
 
@@ -21,16 +22,16 @@ func Test_GetBlockByNumber(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	c.Name = expand.ChainXbtc
 	c.SetPrefix(ss58.ChainXPrefix)
 
 	//expand.SetSerDeOptions(false)
-	resp, err := c.GetBlockByNumber(32100)
+	resp, err := c.GetBlockByNumber(32871)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	hash, err := c.Api.RPC.Chain.GetBlockHash(32100)
+	hash, err := c.Api.RPC.Chain.GetBlockHash(32871)
 	if err != nil {
 		fmt.Printf("GetBlockHash err\n")
 	}
