@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/JFJun/go-substrate-crypto/ss58"
 	"github.com/rjman-self/substrate-go/client"
-	"github.com/rjman-self/substrate-go/expand"
 	"testing"
 )
 
@@ -14,24 +13,23 @@ import (
 //const url = "ws://127.0.0.1:8087"
 //const url = "wss://xbridge.spiderx.pro/ws"
 //const url = "wss://polkadot.elara.patract.io"
-//const url = "wss://dot.supercube.pro/ws"
-const url = "wss://chainx.supercube.pro/ws"
+const url = "wss://dot.supercube.pro/ws"
+//const url = "wss://chainx.supercube.pro/ws"
 
 func Test_GetBlockByNumber(t *testing.T) {
 	c, err := client.New(url)
 	if err != nil {
 		t.Fatal(err)
 	}
-	c.Name = expand.ChainXpcx
-	c.SetPrefix(ss58.ChainXPrefix)
+	c.SetPrefix(ss58.PolkadotPrefix)
 
 	//expand.SetSerDeOptions(false)
-	resp, err := c.GetBlockByNumber(33967)
+	resp, err := c.GetBlockByNumber(41678)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	hash, err := c.Api.RPC.Chain.GetBlockHash(33967)
+	hash, err := c.Api.RPC.Chain.GetBlockHash(41678)
 	if err != nil {
 		fmt.Printf("GetBlockHash err\n")
 	}
