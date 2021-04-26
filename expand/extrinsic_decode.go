@@ -7,6 +7,7 @@ package expand
 */
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/huandu/xstrings"
 	"github.com/rjman-self/substrate-go/utils"
 	"github.com/rjmand/go-substrate-rpc-client/v2/scale"
@@ -185,7 +186,6 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 	switch modName {
 	case "System":
 		if callName == "remark" {
-			fmt.Printf("get Extrinsic Call: System.remark\n")
 			var s string
 			err = decoder.Decode(&s)
 			if err != nil {
@@ -371,7 +371,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				var storeCall bool
 				err = decoder.Decode(&storeCall)
 				if err != nil {
-					fmt.Printf("decode call: decode Multi.as_multi.store_call error: %v, chain is %v\n", err, chainName)
+					log.Debug("decode call: decode Multi.as_multi.store_call error", "Error", err, "Chain", chainName)
 				}
 
 				ed.Params = append(ed.Params,
@@ -385,7 +385,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				var maxWeight types.Weight
 				err = decoder.Decode(&maxWeight)
 				if err != nil {
-					fmt.Printf("decode call: decode Multi.as_multi.max_weight error: %v, chain is %v\n", err, chainName)
+					log.Debug("decode call: decode Multi.as_multi.max_weight error", "Error", err, "Chain", chainName)
 				}
 
 				ed.Params = append(ed.Params,
@@ -517,7 +517,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				var storeCall bool
 				err = decoder.Decode(&storeCall)
 				if err != nil {
-					fmt.Printf("decode call: decode Multi.as_multi.store_call error: %v, chain is %v\n", err, chainName)
+					log.Debug("decode call: decode Multi.as_multi.store_call error", "Error", err, "Chain", chainName)
 				}
 
 				ed.Params = append(ed.Params,
@@ -531,7 +531,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				var maxWeight uint64
 				err = decoder.Decode(&maxWeight)
 				if err != nil {
-					fmt.Printf("decode call: decode Multi.as_multi.max_weight error: %v, chain is %v\n", err, chainName)
+					log.Debug("decode call: decode Multi.as_multi.max_weight error", "Error", err, "Chain", chainName)
 				}
 
 				ed.Params = append(ed.Params,
