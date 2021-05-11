@@ -7,16 +7,16 @@ import (
 	"errors"
 	"fmt"
 	"github.com/JFJun/go-substrate-crypto/ss58"
-	"github.com/rjman-self/substrate-go/expand"
-	"github.com/rjman-self/substrate-go/expand/base"
-	"github.com/rjman-self/substrate-go/expand/chainx/xevents"
-	"github.com/rjman-self/substrate-go/models"
-	"github.com/rjman-self/substrate-go/utils"
 	gsrc "github.com/centrifuge/go-substrate-rpc-client/v3"
 	gsClient "github.com/centrifuge/go-substrate-rpc-client/v3/client"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/rpc"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/scale"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
+	"github.com/rjman-self/substrate-go/expand"
+	"github.com/rjman-self/substrate-go/expand/base"
+	"github.com/rjman-self/substrate-go/expand/chainx/xevents"
+	"github.com/rjman-self/substrate-go/models"
+	"github.com/rjman-self/substrate-go/utils"
 	"golang.org/x/crypto/blake2b"
 	"log"
 	"strconv"
@@ -690,7 +690,7 @@ func (c *Client) parseExtrinsicByStorage(blockHash string, blockResp *models.Blo
 	*/
 	err = c.Api.Client.Call(&result, "state_getStorageAt", key, blockHash)
 	if err != nil {
-		return fmt.Errorf("get storage data error: %v\n", err)
+		fmt.Printf("get storage data error: %v\n", err)
 	}
 	//解析event信息
 	ier, err := expand.DecodeEventRecords(c.Meta, result.(string), c.Name)

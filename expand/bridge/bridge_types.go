@@ -1,9 +1,14 @@
 package bridge
 
 import (
-	events "github.com/ChainSafe/chainbridge-substrate-events"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
+	events "github.com/hacpy/chainbridge-substrate-events"
 )
+
+type BridgeEvents struct {
+	events.Events
+	AssetEvents
+}
 
 type Erc721Token struct {
 	Id       types.U256
@@ -18,8 +23,7 @@ type AssetId struct {
 	TokenId    TokenId
 }
 
-type BridgeEvents struct {
-	events.Events
+type AssetEvents struct {
 	Erc721_Minted                    []EventErc721Minted                   //nolint:stylecheck,golint
 	Erc721_Transferred               []EventErc721Transferred              //nolint:stylecheck,golint
 	Erc721_Burned                    []EventErc721Burned                   //nolint:stylecheck,golint
@@ -48,3 +52,4 @@ type BridgeEvents struct {
 	Registry_RegistryCreated         []EventRegistryRegistryCreated        //nolint:stylecheck,golint
 	Registry_RegistryTmp             []EventRegistryTmp                    //nolint:stylecheck,golint
 }
+
