@@ -2,12 +2,14 @@ package bifrost
 
 import (
 	"fmt"
-	"github.com/rjman-self/substrate-go/expand/base"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/scale"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
+	"github.com/rjman-self/substrate-go/expand/base"
+	"github.com/rjman-self/substrate-go/expand/bridge"
 )
 
 type BifrostEventRecords struct {
+	bridge.BridgeEvents
 	base.BaseEventRecords
 	Democracy_Blacklisted                     []EventDemocracyBlacklisted
 	Elections_ElectionError                   []EventElectionsElectionError

@@ -3,9 +3,11 @@ package polkadot
 import (
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 	"github.com/rjman-self/substrate-go/expand/base"
+	"github.com/rjman-self/substrate-go/expand/bridge"
 )
 
 type PolkadotEventRecords struct {
+	bridge.BridgeEvents
 	types.EventRecords
 	Claims_Claimed                    []EventClaimsClaimed
 	ElectionsPhragmen_VoterReported   []EventElectionsPhragmenVoterReported

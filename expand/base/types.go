@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/scale"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
+	"github.com/rjman-self/substrate-go/expand/bridge"
 )
 
 /// Polkadot MultiSignExtrinsic Type
@@ -22,6 +23,7 @@ var XAsMultiCancelled = "x_as_multi_cancelled"
 var XUtilityBatch = "x_multi_sign_batch"
 
 type BaseEventRecords struct {
+	bridge.BridgeEvents
 	types.EventRecords
 	Treasury_BountyProposed     []EventTreasuryBountyProposed
 	Treasury_BountyRejected     []EventTreasuryBountyRejected
