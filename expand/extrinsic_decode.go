@@ -10,8 +10,8 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/huandu/xstrings"
 	"github.com/rjman-self/substrate-go/utils"
-	"github.com/rjmand/go-substrate-rpc-client/v2/scale"
-	"github.com/rjmand/go-substrate-rpc-client/v2/types"
+	"github.com/centrifuge/go-substrate-rpc-client/v3/scale"
+	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 )
 
 type ExtrinsicDecoder struct {
