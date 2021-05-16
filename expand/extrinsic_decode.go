@@ -7,11 +7,11 @@ package expand
 */
 import (
 	"fmt"
+	"github.com/centrifuge/go-substrate-rpc-client/v3/scale"
+	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/huandu/xstrings"
 	"github.com/rjman-self/substrate-go/utils"
-	"github.com/centrifuge/go-substrate-rpc-client/v3/scale"
-	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 )
 
 type ExtrinsicDecoder struct {
@@ -249,7 +249,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				})
 		}
 	case "Multisig":
-		if ed.checkChainX(chainName) && chainName == ChainXbtc {
+		if ed.checkChainX(chainName) {
 			/// Chain is ChainX-XBTC
 			if callName == "as_multi" {
 				//1. decode threshold
@@ -544,7 +544,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 		}
 	case "Utility":
 		/// Check whether ChainX
-		if ed.checkChainX(chainName) && chainName == ChainXbtc {
+		if ed.checkChainX(chainName) {
 			/// Chain is ChainX-XBTC
 			if callName == "batch" {
 				vec := new(Vec)
@@ -766,7 +766,7 @@ func (ed *ExtrinsicDecoder) checkChainX(chainName string) bool {
 	if err == nil {
 		isChainX = true
 	}
-	if isChainX || chainName == ChainNet  || chainName == ChainXbtc || chainName == ChainXpcx {
+	if isChainX || chainName == ClientNameChainX  || chainName == ClientNameChainXAsset {
 		return true
 	} else {
 		return false

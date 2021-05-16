@@ -5,22 +5,22 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/centrifuge/go-substrate-rpc-client/v3/scale"
+	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 	"github.com/huandu/xstrings"
 	"github.com/rjman-self/substrate-go/uint128"
 	"github.com/rjman-self/substrate-go/utils"
-	"github.com/centrifuge/go-substrate-rpc-client/v3/scale"
-	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 	"github.com/shopspring/decimal"
 	"io"
 	"reflect"
 )
 
 const(
-	ChainXbtc = "chainxbtc"
-	ChainXpcx = "chainxpcx"
-	ChainNet = "chainx"
-	PcxAssetId = 6
+	ClientNameChainXAsset = "chainx_asset"
+	ClientNameChainX = "chainx"
 )
+
+const OriginAssetId = 0
 
 type Balance struct {
 	Reader io.Reader
