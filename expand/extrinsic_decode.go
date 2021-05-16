@@ -249,7 +249,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				})
 		}
 	case "Multisig":
-		if ed.checkChainX(chainName) {
+		if ed.checkChainX(chainName) && chainName == ClientNameChainXAsset {
 			/// Chain is ChainX-XBTC
 			if callName == "as_multi" {
 				//1. decode threshold
@@ -544,7 +544,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 		}
 	case "Utility":
 		/// Check whether ChainX
-		if ed.checkChainX(chainName) {
+		if ed.checkChainX(chainName) && chainName == ClientNameChainXAsset {
 			/// Chain is ChainX-XBTC
 			if callName == "batch" {
 				vec := new(Vec)

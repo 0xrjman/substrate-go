@@ -27,12 +27,12 @@ func Test_GetBlockByNumber(t *testing.T) {
 	c. Name = expand.ClientNameChainX
 
 	//expand.SetSerDeOptions(false)
-	resp, err := c.GetBlockByNumber(334555)
+	resp, err := c.GetBlockByNumber(335328)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	hash, err := c.Api.RPC.Chain.GetBlockHash(334555)
+	hash, err := c.Api.RPC.Chain.GetBlockHash(335328)
 	if err != nil {
 		fmt.Printf("GetBlockHash err\n")
 	}
