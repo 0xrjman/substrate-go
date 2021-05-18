@@ -2,8 +2,8 @@ package polkadot
 
 import (
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
-	"github.com/rjman-self/substrate-go/expand/base"
-	"github.com/rjman-self/substrate-go/expand/bridge"
+	"github.com/rjman-ljm/substrate-go/expand/base"
+	"github.com/rjman-ljm/substrate-go/expand/bridge"
 )
 
 type PolkadotEventRecords struct {

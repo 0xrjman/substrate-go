@@ -1,8 +1,8 @@
 package chainx
 
 import (
-	"github.com/rjman-self/substrate-go/expand/chainx/xevents"
-	"github.com/rjman-self/substrate-go/expand/chainx/xevents/xgateway"
+	"github.com/rjman-ljm/substrate-go/expand/chainx/xevents"
+	"github.com/rjman-ljm/substrate-go/expand/chainx/xevents/xgateway"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 )
 

@@ -1,4 +1,4 @@
-module github.com/rjman-self/substrate-go
+module github.com/rjman-ljm/substrate-go
 
 go 1.15
 

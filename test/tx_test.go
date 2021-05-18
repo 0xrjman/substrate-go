@@ -3,9 +3,9 @@ package test
 import (
 	"fmt"
 	"github.com/JFJun/go-substrate-crypto/crypto"
-	"github.com/rjman-self/substrate-go/client"
-	"github.com/rjman-self/substrate-go/expand"
-	"github.com/rjman-self/substrate-go/tx"
+	"github.com/rjman-ljm/substrate-go/client"
+	"github.com/rjman-ljm/substrate-go/expand"
+	"github.com/rjman-ljm/substrate-go/tx"
 	"testing"
 )
 

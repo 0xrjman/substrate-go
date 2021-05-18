@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/JFJun/go-substrate-crypto/ss58"
-	"github.com/rjman-self/substrate-go/client"
-	"github.com/rjman-self/substrate-go/expand"
+	"github.com/rjman-ljm/substrate-go/client"
+	"github.com/rjman-ljm/substrate-go/expand"
 	"testing"
 )
 
@@ -27,12 +27,12 @@ func Test_GetBlockByNumber(t *testing.T) {
 	c. Name = expand.ClientNameChainX
 
 	//expand.SetSerDeOptions(false)
-	resp, err := c.GetBlockByNumber(335328)
+	resp, err := c.GetBlockByNumber(30)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	hash, err := c.Api.RPC.Chain.GetBlockHash(335328)
+	hash, err := c.Api.RPC.Chain.GetBlockHash(30)
 	if err != nil {
 		fmt.Printf("GetBlockHash err\n")
 	}

@@ -11,7 +11,7 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/huandu/xstrings"
-	"github.com/rjman-self/substrate-go/utils"
+	"github.com/rjman-ljm/substrate-go/utils"
 )
 
 type ExtrinsicDecoder struct {
