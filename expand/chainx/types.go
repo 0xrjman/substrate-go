@@ -3,6 +3,7 @@ package chainx
 import (
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 	"github.com/rjman-ljm/substrate-go/expand/bridge"
+	"github.com/rjman-ljm/substrate-go/expand/chainx/pallets"
 )
 
 type ChainXEventRecords struct {
@@ -10,6 +11,7 @@ type ChainXEventRecords struct {
 	Election
 	XBtcV1
 	bridge.BridgeEvents
+	pallets.Swap
 }
 
 func (p ChainXEventRecords) GetMultisigNewMultisig() []types.EventMultisigNewMultisig {
