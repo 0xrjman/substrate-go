@@ -9,7 +9,7 @@ import (
 type ChainXEventRecords struct {
 	types.EventRecords
 	Election
-	XBtcV1
+	XPallets
 	bridge.BridgeEvents
 	pallets.Swap
 }

@@ -6,13 +6,18 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 )
 
-type XBtcV1 struct {
+type XPallets struct {
 	XTransactionFee_FeePaid []EventXTransactionFeeFeePaid
 	xevents.XAssets
 	xevents.XStaking
 	xevents.XMiningAsset
 	xgateway.XGateWay
 	xevents.XSystem
+}
+
+type XBtcV1 struct {
+	XTransactionFee_FeePaid []EventXTransactionFeeFeePaid
+	///TODO: XBtcV1
 }
 
 type XBtcV2 struct {
