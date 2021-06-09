@@ -543,10 +543,13 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 			}
 		}
 	case "Utility":
+		if callName == "batch_all" {
+			callName = "batch"
+		}
 		/// Check whether ChainX
 		if ed.checkChainX(chainName) && chainName == ClientNameChainXAsset {
 			/// Chain is ChainX-XBTC
-			if callName == "batch" {
+			if callName == "batch" || callName == "batch_all" {
 				vec := new(Vec)
 
 				// 1: XAssets.Transfer
@@ -623,7 +626,7 @@ func (ed *ExtrinsicDecoder) decodeCallIndex(decoder scale.Decoder, chainName str
 				ed.Params = append(ed.Params, ep)
 			}
 		} else {
-			if callName == "batch" {
+			if callName == "batch" || callName == "batch_all" {
 				vec := new(Vec)
 				//BEGIN: Custom decode
 				// 1: Balances.Transfer

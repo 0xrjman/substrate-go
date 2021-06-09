@@ -464,9 +464,12 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 				}
 			}
 		case "Utility":
+			if resp.CallModuleFunction == "batch_all" {
+				resp.CallModuleFunction = "batch"
+			}
 			rightPrefix := string(c.Prefix) == string(ss58.ChainXPrefix) || string(c.Prefix) == string(ss58.ChainXTestNetPrefix)
 			if rightPrefix && c.Name == expand.ClientNameChainXAsset {
-				if resp.CallModuleFunction == "batch" {
+				if resp.CallModuleFunction == "batch" || resp.CallModuleFunction == "batch_all" {
 					blockData := parseBlockExtrinsicParams{}
 					for _, param := range resp.Params {
 						if param.Name == "calls" {
@@ -531,7 +534,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 					params = append(params, blockData)
 				}
 			} else {
-				if resp.CallModuleFunction == "batch" {
+				if resp.CallModuleFunction == "batch" || resp.CallModuleFunction == "batch_all" {
 					blockData := parseBlockExtrinsicParams{}
 					for _, param := range resp.Params {
 						if param.Name == "calls" {

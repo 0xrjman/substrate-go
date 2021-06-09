@@ -14,6 +14,7 @@ var AsMultiApprove = "as_multi_approve"
 var AsMultiExecuted = "as_multi_executed"
 var AsMultiCancelled = "as_multi_cancelled"
 var UtilityBatch = "multi_sign_batch"
+var UtilityBatchAll = "multi_sign_batch_all"
 
 /// ChainX MultiSignExtrinsic Type
 var XAsMultiNew = "x_as_multi_new"
@@ -21,6 +22,7 @@ var XAsMultiApprove = "x_as_multi_approve"
 var XAsMultiExecuted = "x_as_multi_executed"
 var XAsMultiCancelled = "x_as_multi_cancelled"
 var XUtilityBatch = "x_multi_sign_batch"
+var XUtilityBatchAll = "x_multi_sign_batch_all"
 
 type BaseEventRecords struct {
 	bridge.BridgeEvents

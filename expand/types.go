@@ -431,7 +431,10 @@ func (d *GenericMultiAddress) Decode(decoder scale.Decoder) error {
 	case 2:
 		err = decoder.Decode(&d.Address32)
 	case 3:
-		err = decoder.Decode(&d.Address20)
+		err = decoder.Decode(&d.AccountId)
+	case 14:
+		/// Local polkadot
+		err = decoder.Decode(&d.AccountId)
 	case 255:
 		//ChainX
 		err = decoder.Decode(&d.AccountId)
