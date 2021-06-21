@@ -4,9 +4,11 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 	"github.com/rjman-ljm/substrate-go/expand/base"
 	"github.com/rjman-ljm/substrate-go/expand/bridge"
+	"github.com/rjman-ljm/substrate-go/expand/parachain"
 )
 
 type PolkadotEventRecords struct {
+	parachain.ParaEvents
 	bridge.BridgeEvents
 	types.EventRecords
 	Claims_Claimed                    []EventClaimsClaimed
@@ -17,6 +19,7 @@ type PolkadotEventRecords struct {
 	ElectionsPhragmen_EmptyTerm       []EventElectionsPhragmenEmptyTerm
 	//ElectionsPhragmen_NewTerm		[]EventElectionsPhragmenNewTerm		暂不支持解析
 	Democracy_Blacklisted []EventDemocracyBlacklisted
+
 }
 
 func (p PolkadotEventRecords) GetMultisigNewMultisig() []types.EventMultisigNewMultisig {

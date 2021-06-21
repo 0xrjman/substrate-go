@@ -6,6 +6,7 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v3/scale"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 	"github.com/rjman-ljm/substrate-go/expand/bridge"
+	"github.com/rjman-ljm/substrate-go/expand/parachain"
 )
 
 /// Polkadot MultiSignExtrinsic Type
@@ -25,6 +26,7 @@ var XUtilityBatch = "x_multi_sign_batch"
 var XUtilityBatchAll = "x_multi_sign_batch_all"
 
 type BaseEventRecords struct {
+	parachain.ParaEvents
 	bridge.BridgeEvents
 	types.EventRecords
 	Treasury_BountyProposed     []EventTreasuryBountyProposed

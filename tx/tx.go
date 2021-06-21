@@ -3,7 +3,7 @@ package tx
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/JFJun/go-substrate-crypto/crypto"
+	"github.com/rjman-ljm/go-substrate-crypto/crypto"
 	"github.com/rjman-ljm/substrate-go/expand"
 	"github.com/rjman-ljm/substrate-go/utils"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"

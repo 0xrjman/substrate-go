@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/JFJun/go-substrate-crypto/ss58"
+	"github.com/rjman-ljm/go-substrate-crypto/ss58"
 	gsrc "github.com/centrifuge/go-substrate-rpc-client/v3"
 	gsClient "github.com/centrifuge/go-substrate-rpc-client/v3/client"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/rpc"
