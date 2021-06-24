@@ -205,6 +205,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 	}()
 
 	for i, extrinsic := range extrinsics {
+		fmt.Printf("extrinsic %v is %v\n", i, extrinsic)
 		extrinsic = utils.Remove0X(extrinsic)
 		data, err := hex.DecodeString(extrinsic)
 		if err != nil {

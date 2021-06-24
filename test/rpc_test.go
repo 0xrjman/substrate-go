@@ -9,7 +9,7 @@ import (
 )
 
 //const url = "wss://chainx.elara.patract.io"
-//const url = "ws://127.0.0.1:9944"
+//const url = "ws://127.0.0.1:7087"
 //const url = "wss://kusama.elara.patract.io"
 const url = "wss://polkadot.elara.patract.io"
 //const url = "wss://dot.supercube.pro/ws"
@@ -26,12 +26,12 @@ func Test_GetBlockByNumber(t *testing.T) {
 	//c.Name = expand.ClientNameChainX
 
 	//expand.SetSerDeOptions(false)
-	resp, err := c.GetBlockByNumber(5602469)
+	resp, err := c.GetBlockByNumber(5642925)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	hash, err := c.Api.RPC.Chain.GetBlockHash(5602469)
+	hash, err := c.Api.RPC.Chain.GetBlockHash(5642925)
 	if err != nil {
 		fmt.Printf("GetBlockHash err\n")
 	}
