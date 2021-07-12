@@ -17,9 +17,8 @@ type PolkadotEventRecords struct {
 	ElectionsPhragmen_MemberKicked    []EventElectionsPhragmenMemberKicked
 	ElectionsPhragmen_ElectionError   []EventElectionsPhragmenElectionError
 	ElectionsPhragmen_EmptyTerm       []EventElectionsPhragmenEmptyTerm
-	//ElectionsPhragmen_NewTerm		[]EventElectionsPhragmenNewTerm		暂不支持解析
+	//ElectionsPhragmen_NewTerm		  []EventElectionsPhragmenNewTerm		暂不支持解析
 	Democracy_Blacklisted []EventDemocracyBlacklisted
-
 }
 
 func (p PolkadotEventRecords) GetMultisigNewMultisig() []types.EventMultisigNewMultisig {

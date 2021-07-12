@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/rjman-ljm/go-substrate-crypto/ss58"
 	gsrc "github.com/centrifuge/go-substrate-rpc-client/v3"
 	gsClient "github.com/centrifuge/go-substrate-rpc-client/v3/client"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/rpc"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/scale"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
+	log2 "github.com/ethereum/go-ethereum/log"
+	"github.com/rjman-ljm/go-substrate-crypto/ss58"
 	"github.com/rjman-ljm/substrate-go/expand"
 	"github.com/rjman-ljm/substrate-go/expand/base"
 	"github.com/rjman-ljm/substrate-go/expand/chainx/xevents"
@@ -235,13 +236,14 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 			for _, param := range resp.Params {
 				if param.Name == "remark" {
 					var remark = param.Value.(string)
-					fmt.Printf("remark is %v\n", remark)
+					log2.Debug("Extrinsic: System.remark", "Remark", remark)
 				}
 			}
 		case "Timestamp":
 			for _, param := range resp.Params {
 				if param.Name == "now" {
 					timestamp = int64(param.Value.(float64))
+					log2.Debug("Extrinsic: Timestamp.now", "Timestamp", timestamp)
 				}
 			}
 		case "Balances":
@@ -516,7 +518,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 											if value.CallFunction == "remark" {
 												if len(value.CallArgs) > 0 {
 													for _, arg := range value.CallArgs {
-														fmt.Printf("%v\n", arg)
+														//fmt.Printf("System.Remark %v\n", arg)
 														if arg.Name == "_remark" {
 															blockData.recipient = arg.ValueRaw
 															//blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)
