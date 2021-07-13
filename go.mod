@@ -2,6 +2,8 @@ module github.com/rjman-ljm/substrate-go
 
 go 1.15
 
+replace github.com/centrifuge/go-substrate-rpc-client/v3 v3.0.2 => github.com/chainx-org/go-substrate-rpc-client/v3 v3.1.1
+
 require (
 	github.com/centrifuge/go-substrate-rpc-client/v3 v3.0.2
 	github.com/ethereum/go-ethereum v1.10.4

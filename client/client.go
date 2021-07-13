@@ -206,7 +206,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 	}()
 
 	for i, extrinsic := range extrinsics {
-		fmt.Printf("extrinsic %v is %v\n", i, extrinsic)
+		//fmt.Printf("extrinsic %v is %v\n", i, extrinsic)
 		extrinsic = utils.Remove0X(extrinsic)
 		data, err := hex.DecodeString(extrinsic)
 		if err != nil {
@@ -580,7 +580,7 @@ func (c *Client) parseExtrinsicByDecode(extrinsics []string, blockResp *models.B
 											if value.CallFunction == "remark" {
 												if len(value.CallArgs) > 0 {
 													for _, arg := range value.CallArgs {
-														fmt.Printf("%v\n", arg)
+														//fmt.Printf("%v\n", arg)
 														if arg.Name == "_remark" {
 															blockData.recipient = arg.ValueRaw
 															//blockData.to, _ = ss58.EncodeByPubHex(arg.ValueRaw, c.Prefix)

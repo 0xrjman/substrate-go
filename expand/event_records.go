@@ -4,6 +4,7 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 	"github.com/rjman-ljm/substrate-go/expand/bifrost"
 	"github.com/rjman-ljm/substrate-go/expand/chainx"
+	"github.com/rjman-ljm/substrate-go/expand/extra"
 	"github.com/rjman-ljm/substrate-go/expand/polkadot"
 	"strings"
 )
@@ -16,7 +17,7 @@ type IEventRecords interface {
 	GetBalancesTransfer() []types.EventBalancesTransfer
 	GetUtilityBatchCompleted() []types.EventUtilityBatchCompleted
 	GetSystemExtrinsicSuccess() []types.EventSystemExtrinsicSuccess
-	GetSystemExtrinsicFailed() []types.EventSystemExtrinsicFailed
+	GetSystemExtrinsicFailed() []extra.EventSystemExtrinsicFailed
 	///ChainX
 }
 

@@ -3,6 +3,7 @@ package test
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/rjman-ljm/go-substrate-crypto/ss58"
 	"github.com/rjman-ljm/substrate-go/client"
 	"testing"
@@ -10,9 +11,8 @@ import (
 
 //const url = "wss://chainx.elara.patract.io"
 //const url = "ws://127.0.0.1:7087"
-//const url = "wss://kusama.elara.patract.io"
-const url = "wss://polkadot.elara.patract.io"
-
+const url = "wss://kusama.elara.patract.io"
+//const url = "wss://polkadot.elara.patract.io"
 //const url = "wss://polkadot.api.onfinality.io/public-ws"
 
 //const url = "wss://dot.supercube.pro/ws"
@@ -21,8 +21,8 @@ const url = "wss://polkadot.elara.patract.io"
 //const url = "wss://supercube.pro/ws"
 
 //const startBlock = 5715297	/* polkadot.event.proxy_executed */
-const startBlock = 5715947
-const endBlock = 5715947
+const startBlock = 8095008
+const endBlock = 8095008
 
 func Test_GetBlockByNumber(t *testing.T) {
 	c, err := client.New(url)
@@ -31,9 +31,8 @@ func Test_GetBlockByNumber(t *testing.T) {
 	}
 	c.SetPrefix(ss58.ChainXPrefix)
 	//c.Name = expand.ClientNameChainX
-	fmt.Printf("start polling block\n")
 	for i := startBlock; i <= endBlock; i++ {
-		fmt.Printf("poll block#%v\n", i)
+		//fmt.Printf("poll block#%v\n", i)
 		//expand.SetSerDeOptions(false)
 		resp, err := c.GetBlockByNumber(int64(i))
 		if err != nil {
@@ -69,7 +68,7 @@ func Test_GetBlockByNumber(t *testing.T) {
 
 		if block != nil {
 			currentBlock := int64(block.Block.Header.Number)
-			fmt.Printf("block is %v\n", currentBlock)
+			log.Debug("block is %v\n", currentBlock)
 		}
 
 		d, _ := json.Marshal(resp)

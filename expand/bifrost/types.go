@@ -6,13 +6,11 @@ import (
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
 	"github.com/rjman-ljm/substrate-go/expand/base"
 	"github.com/rjman-ljm/substrate-go/expand/bridge"
-	"github.com/rjman-ljm/substrate-go/expand/parachain"
 )
 
 type BifrostEventRecords struct {
-	parachain.ParaEvents
-	bridge.BridgeEvents
 	base.BaseEventRecords
+	bridge.BridgeEvents
 	Democracy_Blacklisted                     []EventDemocracyBlacklisted
 	Elections_ElectionError                   []EventElectionsElectionError
 	Elections_CandidateSlashed                []EventElectionsCandidateSlashed

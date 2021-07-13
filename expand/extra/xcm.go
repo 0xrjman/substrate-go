@@ -1,4 +1,4 @@
-package parachain
+package extra
 
 import (
 	"github.com/centrifuge/go-substrate-rpc-client/v3/scale"

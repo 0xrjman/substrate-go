@@ -1,12 +1,21 @@
-package parachain
+package extra
 
 import gsrpcTypes "github.com/centrifuge/go-substrate-rpc-client/v3/types"
 
-type ParaEvents struct {
+type ExtraEvents struct {
+	ExtraEventRecord
+	//ElectionsPhragmen
+}
+
+type ExtraEventRecord struct {
 	// Fix some events
 	Balances_ReserveRepatriated []gsrpcTypes.EventBalancesReserveRepatriated
 	System_Remarked             []Remarked
 	Scheduler_Dispatched        []SchedulerDispatched
+	Scheduler_Scheduled         []SchedulerScheduled
+	Scheduler_Canceled          []SchedulerCanceled
+	System_ExtrinsicFailed      []EventSystemExtrinsicFailed
+	Proxy_ProxyExecuted         []ProxyProxyExecuted
 
 	// slot auction
 	Crowdloan_Created           []Created
@@ -51,9 +60,9 @@ type ParaEvents struct {
 	PhragmenElection_EmptyTerm         []gsrpcTypes.EventElectionsEmptyTerm
 	PhragmenElection_ElectionError     []gsrpcTypes.EventElectionsElectionError
 	PhragmenElection_MemberKicked      []gsrpcTypes.EventElectionsMemberKicked
-	PhragmenElection_Renounced         []EventElectionsRenounced
-	PhragmenElection_CandidateSlashed  []EventElectionsCandidateSlashed
-	PhragmenElection_SeatHolderSlashed []EventElectionsSeatHolderSlashed
+	PhragmenElection_Renounced         []gsrpcTypes.EventElectionsRenounced
+	PhragmenElection_CandidateSlashed  []gsrpcTypes.EventElectionsCandidateSlashed
+	PhragmenElection_SeatHolderSlashed []gsrpcTypes.EventElectionsSeatHolderSlashed
 
 	Gilt_BidPlaced    []BidPlaced
 	Gilt_BidRetracted []BidRetracted

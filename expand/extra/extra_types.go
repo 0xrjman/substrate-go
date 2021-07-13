@@ -1,6 +1,37 @@
-package parachain
+package extra
 
 import gsrpcTypes "github.com/centrifuge/go-substrate-rpc-client/v3/types"
+
+///centrifuge/v3/types/events.go expand from https://github.com/Phala-Network/go-substrate-rpc-client/blob/master/types/events.go
+
+// EventElectionsMemberKicked is emitted when a member has been removed.
+// This should always be followed by either `NewTerm` or `EmptyTerm`.
+type EventElectionsMemberKicked struct {
+	Phase  gsrpcTypes.Phase
+	Member gsrpcTypes.AccountID
+	Topics []gsrpcTypes.Hash
+}
+
+// EventElectionsMemberRenounced is emitted when a member has renounced their candidacy.
+type EventElectionsRenounced struct {
+	Phase  gsrpcTypes.Phase
+	Member gsrpcTypes.AccountID
+	Topics []gsrpcTypes.Hash
+}
+
+type EventElectionsCandidateSlashed struct {
+	Phase  gsrpcTypes.Phase
+	Member gsrpcTypes.AccountID
+	Amount gsrpcTypes.U128
+	Topics []gsrpcTypes.Hash
+}
+
+type EventElectionsSeatHolderSlashed struct {
+	Phase  gsrpcTypes.Phase
+	Member gsrpcTypes.AccountID
+	Amount gsrpcTypes.U128
+	Topics []gsrpcTypes.Hash
+}
 
 /*
 	RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage} = 32
@@ -186,6 +217,20 @@ type SchedulerDispatched struct {
 	Topics   []gsrpcTypes.Hash
 }
 
+type SchedulerScheduled struct {
+	Phase  gsrpcTypes.Phase
+	When   gsrpcTypes.U32
+	Index  gsrpcTypes.U32
+	Topics []gsrpcTypes.Hash
+}
+
+type SchedulerCanceled struct {
+	Phase  gsrpcTypes.Phase
+	When   gsrpcTypes.U32
+	Index  gsrpcTypes.U32
+	Topics []gsrpcTypes.Hash
+}
+
 /*
 	Paras: parachains_paras::{Pallet, Call, Storage, Event, Config<T>} = 56
 
@@ -335,6 +380,7 @@ type ParaReserved struct {
 
 /*
 	XcmPallet: pallet_xcm::{Pallet, Call, Storage, Event<T>} = 99
+
 	Attempted(xcm::v0::Outcome),
 	Sent(MultiLocation, MultiLocation, Xcm<()>),
 */
@@ -352,33 +398,15 @@ type Sent struct {
 	Topics []gsrpcTypes.Hash
 }
 
-///centrifuge/v3/types/events.go expand from https://github.com/Phala-Network/go-substrate-rpc-client/blob/master/types/events.go
-
-// EventElectionsMemberKicked is emitted when a member has been removed.
-// This should always be followed by either `NewTerm` or `EmptyTerm`.
-type EventElectionsMemberKicked struct {
-	Phase  gsrpcTypes.Phase
-	Member gsrpcTypes.AccountID
-	Topics []gsrpcTypes.Hash
+type EventSystemExtrinsicFailed struct {
+	Phase         gsrpcTypes.Phase
+	DispatchError DispatchError
+	DispatchInfo  gsrpcTypes.DispatchInfo
+	Topics        []gsrpcTypes.Hash
 }
 
-// EventElectionsMemberRenounced is emitted when a member has renounced their candidacy.
-type EventElectionsRenounced struct {
-	Phase  gsrpcTypes.Phase
-	Member gsrpcTypes.AccountID
-	Topics []gsrpcTypes.Hash
-}
-
-type EventElectionsCandidateSlashed struct {
-	Phase  gsrpcTypes.Phase
-	Member gsrpcTypes.AccountID
-	Amount gsrpcTypes.U128
-	Topics []gsrpcTypes.Hash
-}
-
-type EventElectionsSeatHolderSlashed struct {
-	Phase  gsrpcTypes.Phase
-	Member gsrpcTypes.AccountID
-	Amount gsrpcTypes.U128
-	Topics []gsrpcTypes.Hash
+type ProxyProxyExecuted struct {
+	Phase         gsrpcTypes.Phase
+	DispatchError DispatchResult
+	Topics        []gsrpcTypes.Hash
 }

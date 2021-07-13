@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/scale"
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
-	"github.com/rjman-ljm/substrate-go/expand/bridge"
-	"github.com/rjman-ljm/substrate-go/expand/parachain"
+	"github.com/rjman-ljm/substrate-go/expand/extra"
 )
 
 /// Polkadot MultiSignExtrinsic Type
@@ -26,34 +25,35 @@ var XUtilityBatch = "x_multi_sign_batch"
 var XUtilityBatchAll = "x_multi_sign_batch_all"
 
 type BaseEventRecords struct {
-	parachain.ParaEvents
-	bridge.BridgeEvents
-	types.EventRecords
-	Treasury_BountyProposed     []EventTreasuryBountyProposed
-	Treasury_BountyRejected     []EventTreasuryBountyRejected
-	Treasury_BountyBecameActive []EventTreasuryBountyBecameActive
-	Treasury_BountyAwarded      []EventTreasuryBountyAwarded
-	Treasury_BountyClaimed      []EventTreasuryBountyClaimed
-	Treasury_BountyCanceled     []EventTreasuryBountyCanceled
-	Treasury_BountyExtended     []EventTreasuryBountyExtended
-	TechnicalMembership_Dummy   []EventTechnicalMembershipDummy
+	extra.OriginEvents
+	extra.ExtraEvents
+	//types.EventRecords
 
-	Currencies_Transferred    []EventCurrenciesTransferred
-	Currencies_BalanceUpdated []EventCurrenciesBalanceUpdated
-	Currencies_Deposited      []EventCurrenciesDeposited
-	Currencies_Withdrawn      []EventCurrenciesWithdrawn
-
-	Vesting_VestingScheduleAdded    []EventVestingVestingScheduleAdded
-	Vesting_Claimed                 []EventVestingClaimed
-	Vesting_VestingSchedulesUpdated []EventVestingVestingSchedulesUpdated
-
-	Multisig_NewMultisig       []types.EventMultisigNewMultisig
-	Multisig_MultisigApproval  []types.EventMultisigApproval
-	Multisig_MultisigExecuted  []types.EventMultisigExecuted
-	Multisig_MultisigCancelled []types.EventMultisigCancelled
-
-	Balances_ReserveRepatriated []EventBalancesReserveRepatriated
-	Proxy_Announced             []EventProxyAnnounced
+	//Treasury_BountyProposed     []EventTreasuryBountyProposed
+	//Treasury_BountyRejected     []EventTreasuryBountyRejected
+	//Treasury_BountyBecameActive []EventTreasuryBountyBecameActive
+	//Treasury_BountyAwarded      []EventTreasuryBountyAwarded
+	//Treasury_BountyClaimed      []EventTreasuryBountyClaimed
+	//Treasury_BountyCanceled     []EventTreasuryBountyCanceled
+	//Treasury_BountyExtended     []EventTreasuryBountyExtended
+	//TechnicalMembership_Dummy   []EventTechnicalMembershipDummy
+	//
+	//Currencies_Transferred    []EventCurrenciesTransferred
+	//Currencies_BalanceUpdated []EventCurrenciesBalanceUpdated
+	//Currencies_Deposited      []EventCurrenciesDeposited
+	//Currencies_Withdrawn      []EventCurrenciesWithdrawn
+	//
+	//Vesting_VestingScheduleAdded    []EventVestingVestingScheduleAdded
+	//Vesting_Claimed                 []EventVestingClaimed
+	//Vesting_VestingSchedulesUpdated []EventVestingVestingSchedulesUpdated
+	//
+	//Multisig_NewMultisig       []types.EventMultisigNewMultisig
+	//Multisig_MultisigApproval  []types.EventMultisigApproval
+	//Multisig_MultisigExecuted  []types.EventMultisigExecuted
+	//Multisig_MultisigCancelled []types.EventMultisigCancelled
+	//
+	//Balances_ReserveRepatriated []EventBalancesReserveRepatriated
+	//Proxy_Announced             []EventProxyAnnounced
 }
 
 func (d *BaseEventRecords) GetBalancesTransfer() []types.EventBalancesTransfer {
@@ -62,7 +62,7 @@ func (d *BaseEventRecords) GetBalancesTransfer() []types.EventBalancesTransfer {
 func (d *BaseEventRecords) GetSystemExtrinsicSuccess() []types.EventSystemExtrinsicSuccess {
 	return d.System_ExtrinsicSuccess
 }
-func (d *BaseEventRecords) GetSystemExtrinsicFailed() []types.EventSystemExtrinsicFailed {
+func (d *BaseEventRecords) GetSystemExtrinsicFailed() []extra.EventSystemExtrinsicFailed {
 	return d.System_ExtrinsicFailed
 }
 

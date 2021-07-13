@@ -2,18 +2,18 @@ package chainx
 
 import (
 	"github.com/centrifuge/go-substrate-rpc-client/v3/types"
+	"github.com/rjman-ljm/substrate-go/expand/base"
 	"github.com/rjman-ljm/substrate-go/expand/bridge"
 	"github.com/rjman-ljm/substrate-go/expand/chainx/pallets"
-	"github.com/rjman-ljm/substrate-go/expand/parachain"
+	"github.com/rjman-ljm/substrate-go/expand/extra"
 )
 
 type ChainXEventRecords struct {
-	types.EventRecords
-	Election
+	//types.EventRecords
+	base.BaseEventRecords
 	XPallets
-	bridge.BridgeEvents
 	pallets.Swap
-	parachain.ParaEvents
+	bridge.BridgeEvents
 }
 
 func (p ChainXEventRecords) GetMultisigNewMultisig() []types.EventMultisigNewMultisig {
@@ -44,6 +44,6 @@ func (p ChainXEventRecords) GetSystemExtrinsicSuccess() []types.EventSystemExtri
 	return p.System_ExtrinsicSuccess
 }
 
-func (p ChainXEventRecords) GetSystemExtrinsicFailed() []types.EventSystemExtrinsicFailed {
+func (p ChainXEventRecords) GetSystemExtrinsicFailed() []extra.EventSystemExtrinsicFailed {
 	return p.System_ExtrinsicFailed
 }
