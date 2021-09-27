@@ -179,8 +179,8 @@ type CandidateDescriptor struct {
 }
 
 type CandidateReceipt struct {
-	Descriptor CandidateDescriptor
-	Hash       gsrpcTypes.Hash
+	Descriptor      CandidateDescriptor
+	CommitmentsHash gsrpcTypes.Hash
 }
 
 type CandidateIncluded struct {
@@ -409,4 +409,10 @@ type ProxyProxyExecuted struct {
 	Phase         gsrpcTypes.Phase
 	DispatchError DispatchResult
 	Topics        []gsrpcTypes.Hash
+}
+
+// EventUtilityItemCompleted is emitted when a item of batch dispatch completed with no error.
+type EventUtilityItemCompleted struct {
+	Phase  gsrpcTypes.Phase
+	Topics []gsrpcTypes.Hash
 }

@@ -45,8 +45,8 @@ type ExtraEventRecord struct {
 	Inclusion_CandidateBacked   []CandidateBacked
 
 	// kusama
-	ParasInclusion_CandidateIncluded []CandidateIncluded
-	ParasInclusion_CandidateBacked   []CandidateBacked
+	ParaInclusion_CandidateIncluded []CandidateIncluded
+	ParaInclusion_CandidateBacked   []CandidateBacked
 
 	RandomnessCollectiveFlip_Proposed       []Proposed
 	RandomnessCollectiveFlip_Voted          []Voted
@@ -91,4 +91,7 @@ type ExtraEventRecord struct {
 	Registrar_Registered   []Registered
 	Registrar_Deregistered []Deregistered
 	Registrar_Reserved     []ParaReserved
+
+	// Update Origin
+	Utility_ItemCompleted []EventUtilityItemCompleted //nolint:stylecheck,golint
 }
