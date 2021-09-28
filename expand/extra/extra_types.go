@@ -201,6 +201,14 @@ type CandidateBacked struct {
 	Topics     []gsrpcTypes.Hash
 }
 
+type CandidateTimedOut struct {
+	Phase     gsrpcTypes.Phase
+	Receipt   CandidateReceipt
+	Head      gsrpcTypes.Bytes
+	CoreIndex gsrpcTypes.U32
+	Topics    []gsrpcTypes.Hash
+}
+
 type Remarked struct {
 	Phase   gsrpcTypes.Phase
 	Account gsrpcTypes.AccountID

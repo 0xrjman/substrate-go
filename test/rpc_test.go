@@ -27,8 +27,8 @@ const url = "wss://kusama.api.onfinality.io/public-ws"
 //const url = "wss://supercube.pro/ws"
 
 //const startBlock = 5715297	/* polkadot.event.proxy_executed */
-const startBlock = 9408223
-const endBlock = 9408223
+const startBlock = 8878438
+const endBlock = 8878438
 
 func Test_GetBlockByNumber(t *testing.T) {
 	c, err := client.New(url)

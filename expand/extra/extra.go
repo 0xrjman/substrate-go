@@ -43,10 +43,12 @@ type ExtraEventRecord struct {
 	// rococo
 	Inclusion_CandidateIncluded []CandidateIncluded
 	Inclusion_CandidateBacked   []CandidateBacked
+	Inclusion_CandidateTimedOut []CandidateTimedOut
 
 	// kusama
 	ParaInclusion_CandidateIncluded []CandidateIncluded
 	ParaInclusion_CandidateBacked   []CandidateBacked
+	ParaInclusion_CandidateTimedOut []CandidateTimedOut
 
 	RandomnessCollectiveFlip_Proposed       []Proposed
 	RandomnessCollectiveFlip_Voted          []Voted
